@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Performance — Product Index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#2B2B28;--line:#3C3B36;--paper:#F0ECE2;--card:#FCFBF7;--shadow:rgba(43,43,40,.18);
+    --green:#2F9D62;--greenD:#21794B;--red:#D24A3C;--redD:#A6362A;--amber:#E0A93A;--amberD:#B98424;--blue:#3F72BE;--grey:#A7A296;--radius:6px;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:'Space Mono',ui-monospace,Menlo,monospace;padding:30px 20px 64px;line-height:1.45;font-size:13px}
+  .wrap{max-width:1180px;margin:0 auto}
+  h1,h2,h3{font-family:'Space Grotesk',Arial,sans-serif}
+  header.masthead{border:2px solid var(--line);background:var(--ink);color:var(--paper);padding:24px 26px;box-shadow:5px 5px 0 var(--shadow);border-radius:var(--radius);margin-bottom:22px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px}
+  header.masthead h1{font-size:clamp(24px,4vw,40px);line-height:1;letter-spacing:-.5px;text-transform:uppercase;font-weight:700}
+  header.masthead .sub{font-size:11.5px;margin-top:11px;color:var(--amber);letter-spacing:.4px}
+  .tagrow{display:flex;gap:8px;flex-wrap:wrap}
+  .tag{border:1.5px solid rgba(240,236,226,.5);padding:5px 10px;font-size:11px;border-radius:4px;letter-spacing:.3px}
+  .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+  .controls input,.controls select{font-family:'Space Mono',monospace;font-size:12.5px;background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:9px 12px;color:var(--ink);box-shadow:3px 3px 0 var(--shadow)}
+  .controls input{flex:1;min-width:200px}
+  .controls .lbl{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--grey)}
+  .brandchips{display:flex;gap:6px;flex-wrap:wrap}
+  .bchip{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;padding:6px 12px;border:2px solid var(--line);border-radius:20px;background:var(--card);cursor:pointer;box-shadow:2px 2px 0 var(--shadow);user-select:none}
+  .bchip.on{background:var(--ink);color:var(--paper)}
+  .grid{display:grid;gap:16px;grid-template-columns:repeat(2,1fr)}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+  .pcard{border:2px solid var(--line);background:var(--ink);color:var(--paper);border-radius:var(--radius);box-shadow:4px 4px 0 var(--shadow);padding:18px 18px 16px;cursor:pointer;transition:transform .08s,box-shadow .08s;display:flex;flex-direction:column;gap:11px;text-decoration:none}
+  .pcard:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--shadow)}
+  .pcard .ptop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .pcard h3{font-size:17px;line-height:1.08;text-transform:uppercase;letter-spacing:-.3px;color:var(--paper)}
+  .badges{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+  .badge{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:9px;letter-spacing:.4px;text-transform:uppercase;padding:3px 7px;border-radius:4px;white-space:nowrap}
+  .b-dellulu{background:var(--amber);color:var(--ink)} .b-flanq{background:var(--blue);color:#fff} .b-snugllama{background:var(--green);color:#fff} .b-other{background:var(--grey);color:var(--ink)}
+  .pcard .psub{font-size:10.5px;color:#cfcabb;letter-spacing:.2px;margin-top:-4px}
+  .pcard .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+  .pcard .t{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:10.5px;padding:4px 8px;border:1.5px solid rgba(240,236,226,.35);border-radius:4px}
+  .t.real{background:var(--amber);color:var(--ink);border-color:var(--amber)} .t.del{color:var(--green)} .t.rto{color:#e9907f} .t.cod{color:#e9c477} .t.stuck{background:var(--red);color:#fff;border-color:var(--red)}
+  .pcard .meter{height:7px;background:rgba(240,236,226,.18);border:1.5px solid rgba(240,236,226,.3);border-radius:3px;overflow:hidden;margin-top:3px}
+  .pcard .meter>span{display:block;height:100%}
+  .pcard .foot{display:flex;justify-content:space-between;font-size:9.5px;color:#b8b3a6;letter-spacing:.3px;margin-top:1px}
+  .matpill{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:9px;padding:1px 6px;border-radius:3px;text-transform:uppercase}
+  .mat-ok{background:var(--green);color:#fff} .mat-warn{background:var(--amber);color:var(--ink)} .mat-bad{background:var(--red);color:#fff}
+  #loadmsg{padding:40px 0;text-align:center;font-size:13px;font-family:'Space Grotesk',sans-serif;color:#6b685f}
+  #countline{font-size:11px;margin-bottom:12px;letter-spacing:.4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;color:#6b685f}
+  footer{margin-top:40px;border-top:2px dashed var(--grey);padding-top:14px;font-size:10.5px;color:#6b685f;letter-spacing:.3px;text-transform:uppercase}
+</style></head><body><div class="wrap">
+
+  <header class="masthead">
+    <div><h1>Delivery //<br>Performance Index</h1><div class="sub" id="hdrsub">Loading…</div></div>
+    <div class="tagrow" id="hdrtags"></div>
+  </header>
+
+  <div class="controls">
+    <input id="search" placeholder="Search product or SKU…" autocomplete="off">
+    <span class="lbl">Sort</span>
+    <select id="sort">
+      <option value="recent">Recently active</option>
+      <option value="az">Product A–Z</option>
+      <option value="za">Product Z–A</option>
+      <option value="orders">Most orders</option>
+      <option value="rto">Worst RTO</option>
+    </select>
+    <div class="brandchips" id="brandchips"></div>
+  </div>
+  <div id="countline"></div>
+  <div id="loadmsg">Loading live data from Supabase…</div>
+  <div class="grid" id="grid" style="display:none"></div>
+  <footer id="footer">Delivery Performance · Product index · Live feed</footer>
+</div>
+
+<script>
+const SUPA_URL='https://amnqeynggnwqktvepulv.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbnFleW5nZ253cWt0dmVwdWx2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjY5OTUsImV4cCI6MjA5MDIwMjk5NX0.7YNuC6ihcaM8Ow31rnp-9IYdIlXiAVzMMU2bBzc-IDk';
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmtDate=s=>{if(!s)return'—';const d=new Date(s);return d.getUTCDate().toString().padStart(2,'0')+' '+MN[d.getUTCMonth()]+' '+d.getUTCFullYear();};
+const Lk=x=>'₹'+(Number(x)/100000).toFixed(2)+'L';
+const r1=(num,den)=>den?Math.round(num/den*1000)/10:0;
+let ROWS=[], activeBrand='All';
+
+async function load(){
+  try{
+    const res=await fetch(SUPA_URL+'/rest/v1/rpc/get_products_overview',{method:'POST',
+      headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:'{}'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    ROWS=await res.json();
+    document.getElementById('loadmsg').style.display='none';
+    document.getElementById('grid').style.display='grid';
+    buildHeader(); buildBrandChips(); render();
+  }catch(e){document.getElementById('loadmsg').innerHTML='Could not load: '+e.message;}
+}
+function buildHeader(){
+  const products=new Set(ROWS.map(x=>x.product)), brands=[...new Set(ROWS.map(x=>x.brand))];
+  const orders=ROWS.reduce((a,x)=>a+x.n_orders,0);
+  const freshest=ROWS.reduce((a,x)=>x.last_snapshot>a?x.last_snapshot:a,'');
+  document.getElementById('hdrsub').textContent=products.size+' products · '+brands.length+' brands · '+orders.toLocaleString('en-IN')+' orders · data as of '+fmtDate(freshest);
+  document.getElementById('hdrtags').innerHTML=brands.map(b=>'<span class="tag">'+b+'</span>').join('');
+}
+function buildBrandChips(){
+  const brands=['All',...[...new Set(ROWS.map(x=>x.brand))].sort()];
+  document.getElementById('brandchips').innerHTML=brands.map(b=>'<span class="bchip'+(b==='All'?' on':'')+'" data-b="'+b+'">'+b+'</span>').join('');
+  document.querySelectorAll('.bchip').forEach(c=>c.onclick=()=>{activeBrand=c.dataset.b;document.querySelectorAll('.bchip').forEach(x=>x.classList.toggle('on',x.dataset.b===activeBrand));render();});
+}
+function bClass(b){b=(b||'').toLowerCase();return b.indexOf('dellulu')>=0?'b-dellulu':b.indexOf('flanq')>=0?'b-flanq':b.indexOf('snug')>=0?'b-snugllama':'b-other';}
+function drColor(dr){return dr>=70?'var(--green)':dr>=50?'var(--amber)':'var(--red)';}
+function matPill(m){const c=m>=90?'mat-ok':m>=60?'mat-warn':'mat-bad';return '<span class="matpill '+c+'">'+m+'% mature</span>';}
+
+// group flat (product,brand) rows -> one card object per product for the active view
+function buildCards(){
+  const src = activeBrand==='All' ? ROWS : ROWS.filter(x=>x.brand===activeBrand);
+  const map={};
+  src.forEach(x=>{
+    let g=map[x.product]; if(!g){g=map[x.product]={product:x.product,display_name:x.display_name,brands:[],
+      n_orders:0,delivered:0,concluded:0,rto:0,cod:0,gmv:0,realised:0,t1:0,stuck:0,last_order:'',last_snapshot:''};}
+    g.brands.push(x.brand);
+    g.n_orders+=x.n_orders; g.delivered+=x.delivered; g.concluded+=x.concluded; g.rto+=x.rto;
+    g.cod+=x.cod; g.gmv+=x.gmv; g.realised+=x.realised; g.t1+=x.t1; g.stuck+=x.stuck;
+    if(x.last_order>g.last_order)g.last_order=x.last_order;
+    if(x.last_snapshot>g.last_snapshot)g.last_snapshot=x.last_snapshot;
+  });
+  return Object.values(map).map(g=>({...g,
+    delivery_rate:r1(g.delivered,g.concluded), rto_rate:r1(g.rto,g.concluded),
+    cod_pct:r1(g.cod,g.n_orders), maturity:r1(g.concluded,g.n_orders), t1_pct:r1(g.t1,g.n_orders)}));
+}
+function render(){
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  const sort=document.getElementById('sort').value;
+  let cards=buildCards().filter(x=>!q || (x.display_name||'').toLowerCase().includes(q) || (x.product||'').toLowerCase().includes(q));
+  const cmp={recent:(a,b)=>(b.last_order||'').localeCompare(a.last_order||''),
+    az:(a,b)=>(a.display_name||'').localeCompare(b.display_name||''),
+    za:(a,b)=>(b.display_name||'').localeCompare(a.display_name||''),
+    orders:(a,b)=>b.n_orders-a.n_orders, rto:(a,b)=>b.rto_rate-a.rto_rate}[sort];
+  cards.sort(cmp);
+  document.getElementById('countline').textContent='Showing '+cards.length+' products'+(activeBrand!=='All'?' · '+activeBrand:' · all brands');
+  document.getElementById('grid').innerHTML=cards.map(x=>{
+    const dr=x.delivery_rate, name=(x.display_name||x.product);
+    const ubrands=[...new Set(x.brands)];
+    const badges=ubrands.map(b=>'<span class="badge '+bClass(b)+'">'+b+'</span>').join('');
+    const link='product.html?product='+encodeURIComponent(x.product)+(activeBrand!=='All'?'&brand='+encodeURIComponent(activeBrand):'');
+    return '<a class="pcard" href="'+link+'">'+
+      '<div class="ptop"><h3>'+name+'</h3><div class="badges">'+badges+'</div></div>'+
+      '<div class="psub">'+x.product+' · n='+x.n_orders+(ubrands.length>1?' · '+ubrands.length+' brands':'')+' · last order '+fmtDate(x.last_order)+'</div>'+
+      '<div class="tags">'+
+        '<span class="t real">'+Lk(x.realised)+' / '+Lk(x.gmv)+'</span>'+
+        '<span class="t del">Deliv '+dr+'%</span><span class="t rto">RTO '+x.rto_rate+'%</span>'+
+        '<span class="t cod">COD '+x.cod_pct+'%</span>'+(x.stuck>0?'<span class="t stuck">'+x.stuck+' stuck</span>':'')+
+      '</div>'+
+      '<div class="meter"><span style="width:'+dr+'%;background:'+drColor(dr)+'"></span></div>'+
+      '<div class="foot"><span>'+matPill(x.maturity)+'</span><span>Tier 1 · '+x.t1_pct+'%</span></div></a>';
+  }).join('');
+}
+document.getElementById('search').addEventListener('input',render);
+document.getElementById('sort').addEventListener('change',render);
+load();
+</script>
+</body></html>
