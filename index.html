@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Delivery Performance — Product Index</title>
+<title>Product Performance — Dellulu Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{--ink:#1C1B19;--line:#2E2D27;--paper:#F4EFE2;--card:#FBF8EE;--shadow:rgba(28,27,25,.18);
     --green:#2C6E5D;--greenD:#1E5446;--red:#E1502A;--redD:#B83C18;--amber:#EBB12E;--amberD:#C8901C;--blue:#6B5DA6;--grey:#A39C8C;--radius:6px;}
@@ -51,24 +52,93 @@
   #miniBanner .mt{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:-.4px;color:var(--paper)}
   #miniBanner .ml{display:flex;gap:6px;align-items:center}
   #miniBanner .ml img{height:16px;width:auto;background:var(--paper);border-radius:3px;padding:2px 4px}
-.appnav-in{max-width:1180px;margin:0 auto;padding:0 20px 16px;display:flex;gap:8px;flex-wrap:wrap}
-.appnav nav{display:flex;gap:8px;flex-wrap:wrap}
-.appnav nav a{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#6b685f;text-decoration:none;padding:8px 16px;border:2px solid var(--line);border-radius:var(--radius);background:var(--card);box-shadow:3px 3px 0 var(--shadow)}
-.appnav nav a:hover{background:#efe6cf}
-.appnav nav a.active{background:var(--ink);color:var(--paper)}
+.snav{position:fixed;top:0;left:0;bottom:0;width:58px;background:var(--ink);border-right:2px solid var(--line);display:flex;flex-direction:column;gap:8px;padding:12px 9px;z-index:120;transition:width .16s ease}
+.snav.open{width:204px;box-shadow:7px 0 0 var(--shadow)}
+.snav-toggle{background:transparent;border:2px solid rgba(244,239,226,.28);color:var(--paper);border-radius:var(--radius);height:40px;min-height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;padding:0 9px}
+.snav-toggle:hover{background:rgba(244,239,226,.1)}
+.snav-toggle .lb{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--amber);white-space:nowrap;opacity:0;width:0;overflow:hidden}
+.snav.open .snav-toggle{justify-content:flex-start}
+.snav.open .snav-toggle .lb{opacity:1;width:auto}
+.snav nav{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.snav nav a{display:flex;align-items:center;gap:12px;color:#cfcabb;text-decoration:none;padding:10px 9px;border:2px solid transparent;border-radius:var(--radius);white-space:nowrap;overflow:hidden}
+.snav nav a .ic{flex:0 0 22px;display:flex;align-items:center;justify-content:center}
+.snav nav a .ic svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.9}
+.snav nav a .lb{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;letter-spacing:.4px;text-transform:uppercase;opacity:0;transition:opacity .12s}
+.snav.open nav a .lb{opacity:1}
+.snav nav a:hover{background:rgba(244,239,226,.1);color:var(--paper)}
+.snav nav a.active{background:var(--amber);color:var(--ink)}
+body{padding-left:78px}
+@media(max-width:760px){.snav{flex-direction:row;position:sticky;width:auto;height:auto;bottom:auto;align-items:center;padding:8px 12px}.snav.open{width:auto}.snav nav{flex-direction:row;margin-top:0}.snav nav a .lb{opacity:1}body{padding-left:14px}}
+.modal{display:none;position:fixed;inset:0;background:rgba(28,27,25,.5);z-index:300;align-items:center;justify-content:center;padding:28px}
+.modal.show{display:flex}
+.modal-box{background:var(--card);border:2px solid var(--line);box-shadow:8px 8px 0 var(--shadow);border-radius:var(--radius);max-width:1040px;width:100%;max-height:86vh;overflow:hidden;padding:20px 20px 22px;position:relative;display:flex;flex-direction:column}
+.modal-box h3{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;margin:0 30px 12px 0;text-transform:uppercase;letter-spacing:.4px}
+.modal-x{position:absolute;top:12px;right:14px;background:transparent;border:none;font-size:26px;line-height:1;cursor:pointer;color:var(--ink)}
+.modal-box .lgtable{max-height:74vh}
+.leaguecard.openable{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.leaguecard.openable:hover{background:#f3ead0}
+.openicon{flex:0 0 auto;width:34px;height:34px;border:2px solid var(--line);border-radius:var(--radius);display:flex;align-items:center;justify-content:center}
+.openicon svg{width:18px;height:18px;stroke:var(--ink);fill:none;stroke-width:2}
+.slbl{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin:26px 0 13px;display:flex;align-items:center;gap:9px;color:var(--line)}
+.slbl::before{content:"";width:11px;height:11px;background:var(--amber);border:1.5px solid var(--line);border-radius:2px;display:inline-block}
+.slbl .ix{color:var(--grey);font-weight:400}
+.ovgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:900px){.ovgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.ovgrid{grid-template-columns:1fr}}
+.kcard{background:var(--card);border:2px solid var(--line);box-shadow:4px 4px 0 var(--shadow);border-radius:var(--radius);padding:16px;overflow:hidden}
+.kcard .ktop{height:5px;margin:-16px -16px 12px;border-bottom:2px solid var(--line)}
+.kcard .kx{font-size:9px;letter-spacing:.6px;color:var(--grey);font-weight:700;text-transform:uppercase;font-family:'Space Grotesk',sans-serif}
+.kcard .kl{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:12.5px;margin-top:3px}
+.kcard .kv{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(24px,3.3vw,34px);line-height:1;margin:10px 0 5px;font-variant-numeric:tabular-nums}
+.kcard .ks{font-size:10.5px;color:#6b685f}
+.bubblecard,.leaguecard{background:var(--card);border:2px solid var(--line);box-shadow:4px 4px 0 var(--shadow);border-radius:var(--radius);padding:16px 18px}
+.bubblecard h3,.leaguecard h3{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin-bottom:3px}
+.bubblecard .cd,.leaguecard .cd{font-size:10.5px;color:#5e5b53;margin-bottom:12px}
+.bubblewrap{position:relative;width:100%;height:380px}
+.lgtable{max-height:440px;overflow:auto;border:1.5px solid var(--line);border-radius:4px}
+table.lg{width:100%;border-collapse:collapse;font-size:11.5px}
+table.lg thead th{position:sticky;top:0;background:var(--ink);color:var(--paper);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:9.5px;letter-spacing:.4px;text-transform:uppercase;padding:8px 9px;text-align:right;white-space:nowrap}
+table.lg thead th.l{text-align:left}
+table.lg td{padding:7px 9px;border-bottom:1px solid #e7e2d6;text-align:right;font-variant-numeric:tabular-nums}
+table.lg td.l{text-align:left;font-family:'Space Grotesk',sans-serif;font-weight:700}
+table.lg tr:hover td{background:#f3ead0}
+.lgflag{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:9px;padding:2px 7px;border-radius:3px}
+.f-kill{background:var(--red);color:#fff}.f-watch{background:var(--amber);color:var(--ink)}.f-healthy{background:var(--green);color:#fff}.f-new{background:#e7e2d6;color:#6b685f}
+.tg{color:var(--greenD)}.ta{color:var(--amberD)}.tr{color:var(--redD)}
+.pcard{background:var(--card);color:var(--ink)}
+.pcard h3{color:var(--ink)}
+.pcard .psub{color:#6b685f}
+.pcard .ptop{align-items:center}
+.pcard .badges{justify-content:flex-start;flex-wrap:wrap;margin-top:-4px}
+.pcard .t{border-color:var(--line)}
+.pcard .t.del{color:var(--greenD)}.pcard .t.rto{color:var(--redD)}.pcard .t.cod{color:var(--amberD)}
+.pcard .meter{background:#e7e2d6;border-color:var(--line)}
+.pcard .foot{color:#6b685f}
+.flag{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:9px;letter-spacing:.4px;text-transform:uppercase;padding:3px 9px;border:1.5px solid var(--line);border-radius:4px}
 </style></head><body>
-<div class="appnav"><div class="appnav-in">
+<div class="snav" id="snav">
+  <button class="snav-toggle" id="snavToggle" aria-label="Toggle menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg><span class="lb">Menu</span></button>
   <nav>
-    <a href="index.html" class="active">Product Delivery</a>
-    <a href="courier.html" id="navCourier">Courier Performance</a>
+    <a href="index.html" class="active"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span class="lb">Product Performance</span></a>
+    <a href="courier.html" id="navCourier"><span class="ic"><svg viewBox="0 0 24 24"><rect x="1" y="6" width="13" height="11" rx="1"/><path d="M14 9h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.7"/><circle cx="17" cy="18.5" r="1.7"/></svg></span><span class="lb">Courier Performance</span></a>
   </nav>
-</div></div>
+</div>
 <div class="wrap">
 
   <header class="masthead">
-    <div><h1>Delivery //<br>Performance Index</h1><div class="sub" id="hdrsub">Loading…</div></div>
+    <div><h1>Product //<br>Performance</h1><div class="sub" id="hdrsub">Loading…</div></div>
     <div class="tagrow" id="hdrtags"></div>
   </header>
+
+  <div class="slbl"><span class="ix">01 /</span> Portfolio at a glance</div>
+  <div class="ovgrid" id="portfolio"></div>
+
+  <div class="slbl"><span class="ix">02 /</span> The pattern — COD drives RTO</div>
+  <div class="bubblecard"><h3>COD share vs RTO rate · all product lines</h3><div class="cd" id="bubbleDesc">Bubble size = order volume · colour = health flag · hollow = too new to judge.</div><div class="bubblewrap"><canvas id="bubble"></canvas></div></div>
+
+  <div class="slbl"><span class="ix">03 /</span> Product league table — worst returns first</div>
+  <div class="leaguecard openable" id="leagueOpen"><div><h3 style="margin:0 0 3px">Open the league table</h3><div class="cd" style="margin:0">Every product line ranked by RTO · ₹ at risk · health flag.</div></div><span class="openicon" title="Open full table"><svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h6"/></svg></span></div>
+  <div class="modal" id="leagueModal"><div class="modal-box"><button class="modal-x" id="leagueX" aria-label="Close">×</button><h3>Product league table — worst returns first</h3><div class="lgtable"><table class="lg" id="league"></table></div></div></div>
 
   <div id="homesticky">
   <div id="miniBanner"><span class="mt">Delivery // Performance Index</span><span class="ml" id="miniLogos"></span></div>
@@ -159,7 +229,9 @@ function buildCards(){
 function render(){
   const q=document.getElementById('search').value.trim().toLowerCase();
   const sort=document.getElementById('sort').value;
-  let cards=buildCards().filter(x=>!q || (x.display_name||'').toLowerCase().includes(q) || (x.product||'').toLowerCase().includes(q));
+  const allCards=buildCards();
+  buildPortfolio(allCards); buildBubble(allCards); buildLeague(allCards);
+  let cards=allCards.filter(x=>!q || (x.display_name||'').toLowerCase().includes(q) || (x.product||'').toLowerCase().includes(q));
   const cmp={recent:(a,b)=>(b.last_order_ts||b.last_order||'').localeCompare(a.last_order_ts||a.last_order||''),
     az:(a,b)=>(a.display_name||'').localeCompare(b.display_name||''),
     za:(a,b)=>(b.display_name||'').localeCompare(a.display_name||''),
@@ -170,9 +242,11 @@ function render(){
     const dr=x.delivery_rate, name=(x.display_name||x.product);
     const ubrands=[...new Set(x.brands)];
     const badges=ubrands.map(b=>'<span class="badge '+bClass(b)+'">'+b+'</span>').join('');
+    const fl=flag(x);
     const link='product.html?product='+encodeURIComponent(x.product)+(activeBrand!=='All'?'&brand='+encodeURIComponent(activeBrand):'');
     return '<a class="pcard" href="'+link+'">'+
-      '<div class="ptop"><h3>'+name+'</h3><div class="badges">'+badges+'</div></div>'+
+      '<div class="ptop"><h3>'+name+'</h3><span class="flag f-'+fl.k+'">'+fl.t+'</span></div>'+
+      '<div class="badges">'+badges+'</div>'+
       '<div class="psub">'+x.product+' · n='+x.n_orders+(ubrands.length>1?' · '+ubrands.length+' brands':'')+' · last order '+fmtDate(x.last_order)+'</div>'+
       '<div class="tags">'+
         '<span class="t real">'+Lk(x.realised)+' / '+Lk(x.gmv)+'</span>'+
@@ -183,6 +257,50 @@ function render(){
       '<div class="foot"><span>'+matPill(x.maturity)+'</span><span>Tier 1 · '+x.t1_pct+'%</span></div></a>';
   }).join('');
 }
+function flag(c){if((c.maturity||0)<60)return{k:'new',t:'New'};if(c.rto_rate<=22)return{k:'healthy',t:'Healthy'};if(c.rto_rate<=33)return{k:'watch',t:'Watch'};return{k:'kill',t:'Kill'};}
+function buildPortfolio(cards){
+  const s=cards.reduce((a,x)=>{a.n+=x.n_orders;a.gmv+=x.gmv;a.real+=x.realised;a.conc+=x.concluded;a.rto+=x.rto;a.deliv+=x.delivered;a.lost+=x.concluded?x.gmv*x.rto/x.concluded:0;a.stuck+=x.stuck;return a;},{n:0,gmv:0,real:0,conc:0,rto:0,deliv:0,lost:0,stuck:0});
+  const rtoRate=r1(s.rto,s.conc), realPct=s.gmv?Math.round(s.real/s.gmv*100):0;
+  const C=[
+    {col:'var(--blue)',kc:'var(--ink)',x:'Volume',l:'Total Orders',v:s.n.toLocaleString('en-IN'),s:cards.length+' product lines · '+Lk(s.gmv)+' GMV'},
+    {col:'var(--green)',kc:'var(--greenD)',x:'Realised',l:'Realised Revenue',v:Lk(s.real),s:realPct+'% of GMV banked'},
+    {col:'var(--red)',kc:'var(--redD)',x:'Returns',l:'Blended RTO Rate',v:rtoRate+'%',s:s.rto.toLocaleString('en-IN')+' of '+s.conc.toLocaleString('en-IN')+' concluded returned'},
+    {col:'var(--red)',kc:'var(--redD)',x:'Leakage',l:'₹ Lost to RTO',v:Lk(s.lost),s:'GMV bounced'+(s.stuck?' · '+s.stuck+' stuck':'')}];
+  document.getElementById('portfolio').innerHTML=C.map(c=>`<div class="kcard"><div class="ktop" style="background:${c.col}"></div><div class="kx">[ ${c.x} ]</div><div class="kl">${c.l}</div><div class="kv" style="color:${c.kc}">${c.v}</div><div class="ks">${c.s}</div></div>`).join('');
+}
+let bubbleChart;
+function buildBubble(cards){
+  const col={kill:'#E1502A',watch:'#EBB12E',healthy:'#2C6E5D',new:'#A39C8C'};
+  const pts=cards.filter(c=>c.n_orders>0);
+  const data=pts.map(c=>{const f=flag(c);return{x:c.cod_pct,y:c.rto_rate,r:Math.max(4,Math.sqrt(c.n_orders)*0.85),name:(c.display_name||c.product),fl:f.k};});
+  const bg=data.map(d=>d.fl==='new'?'rgba(163,156,140,.18)':col[d.fl]+'cc');
+  const bd=data.map(d=>col[d.fl]);
+  const m=pts.filter(c=>flag(c).k!=='new'&&c.n_orders>=20);let line=[],rtxt='';
+  if(m.length>2){const xs=m.map(c=>c.cod_pct),ys=m.map(c=>c.rto_rate),n=xs.length;const mx=xs.reduce((a,b)=>a+b,0)/n,my=ys.reduce((a,b)=>a+b,0)/n;let sxy=0,sxx=0,syy=0;for(let i=0;i<n;i++){sxy+=(xs[i]-mx)*(ys[i]-my);sxx+=(xs[i]-mx)**2;syy+=(ys[i]-my)**2;}const sl=sxy/sxx,it=my-sl*mx,r=sxy/Math.sqrt(sxx*syy);rtxt=' · r='+r.toFixed(2);const x0=Math.min(...xs),x1=Math.max(...xs);line=[{x:x0,y:sl*x0+it},{x:x1,y:sl*x1+it}];}
+  const dd=document.getElementById('bubbleDesc');if(dd)dd.textContent='Bubble size = order volume · colour = health flag · hollow = too new'+rtxt+'.';
+  const xmin=data.length?Math.max(0,Math.floor(Math.min(...data.map(d=>d.x))/10)*10):0;
+  if(bubbleChart)bubbleChart.destroy();
+  bubbleChart=new Chart(document.getElementById('bubble'),{data:{datasets:[
+    {type:'bubble',data:data,backgroundColor:bg,borderColor:bd,borderWidth:1.5},
+    {type:'line',data:line,borderColor:'#B83C18',borderWidth:2,borderDash:[6,5],pointRadius:0,fill:false}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw&&c.raw.name?c.raw.name+': COD '+c.raw.x+'% · RTO '+c.raw.y+'%':''}}},scales:{x:{title:{display:true,text:'COD share of orders (%)'},min:xmin,max:100,ticks:{stepSize:10},grid:{color:'rgba(28,27,25,.08)'}},y:{title:{display:true,text:'RTO rate (%)'},min:0,grid:{color:'rgba(28,27,25,.08)'}}}}});
+}
+function buildLeague(cards){
+  const rows=cards.slice().sort((a,b)=>b.rto_rate-a.rto_rate);
+  const head='<thead><tr><th class="l">#</th><th class="l">Product · brands</th><th>Orders</th><th>COD%</th><th>Deliv%</th><th>RTO%</th><th>Real%</th><th>₹ at risk</th><th>Mat</th><th>Flag</th></tr></thead>';
+  const body=rows.map((x,i)=>{const f=flag(x);const realPct=x.gmv?Math.round(x.realised/x.gmv*100):0;const atrisk=x.concluded?x.gmv*x.rto/x.concluded:0;const rtoCls=x.rto_rate<=22?'tg':x.rto_rate<=33?'ta':'tr';const delCls=x.delivery_rate>=70?'tg':x.delivery_rate>=55?'ta':'tr';
+    return `<tr><td class="l">${i+1}</td><td class="l">${(x.display_name||x.product)} · ${[...new Set(x.brands)].length}b</td><td>${x.n_orders}</td><td>${x.cod_pct}%</td><td class="${delCls}">${x.delivery_rate}%</td><td class="${rtoCls}">${x.rto_rate}%</td><td>${realPct}%</td><td>${Lk(atrisk)}</td><td>${x.maturity}%</td><td><span class="lgflag f-${f.k}">${f.t}</span></td></tr>`;}).join('');
+  document.getElementById('league').innerHTML=head+'<tbody>'+body+'</tbody>';
+}
+(function(){var s=document.getElementById('snav'),t=document.getElementById('snavToggle');
+ if(t)t.addEventListener('click',function(e){e.stopPropagation();s.classList.toggle('open');});
+ document.addEventListener('click',function(e){if(s&&s.classList.contains('open')&&!s.contains(e.target))s.classList.remove('open');});
+ var lo=document.getElementById('leagueOpen'),lm=document.getElementById('leagueModal'),lx=document.getElementById('leagueX');
+ if(lo)lo.addEventListener('click',function(){lm.classList.add('show');});
+ if(lx)lx.addEventListener('click',function(){lm.classList.remove('show');});
+ if(lm)lm.addEventListener('click',function(e){if(e.target===lm)lm.classList.remove('show');});
+ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&lm)lm.classList.remove('show');});
+})();
 document.getElementById('search').addEventListener('input',render);
 document.getElementById('sort').addEventListener('change',render);
 load();

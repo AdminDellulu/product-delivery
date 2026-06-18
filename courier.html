@@ -156,38 +156,43 @@ td:first-child,th:first-child,td.l,th.l{text-align:left}
 footer{margin-top:40px;border-top:2px dashed var(--grey);padding-top:14px;font-size:10.5px;color:#6b685f;line-height:1.7}
 </style>
 <style>
-.appnav-in{max-width:1280px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.appnav nav{display:flex;gap:8px;flex-wrap:wrap}
-.appnav nav a{font-family:'Space Grotesk';font-weight:700;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#6b685f;text-decoration:none;padding:8px 16px;border:2px solid var(--line);border-radius:var(--radius);background:var(--card);box-shadow:3px 3px 0 var(--shadow)}
-.appnav nav a:hover{background:#f3ead0}
-.appnav nav a.active{background:var(--ink);color:var(--paper)}
-.appnav .bswitch{margin-left:auto;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
-.appnav .bswitch .bl{font-family:'Space Grotesk';font-weight:700;font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--grey)}
-.appnav .bchip{font-family:'Space Grotesk';font-weight:700;font-size:11px;padding:6px 13px;border:2px solid var(--line);border-radius:20px;cursor:pointer;user-select:none;color:#6b685f;background:var(--card);box-shadow:2px 2px 0 var(--shadow)}
-.appnav .bchip:hover{background:#f3ead0}
-.appnav .bchip.on{background:var(--ink);color:var(--paper)}
+.snav{position:fixed;top:0;left:0;bottom:0;width:58px;background:var(--ink);border-right:2px solid var(--line);display:flex;flex-direction:column;gap:8px;padding:12px 9px;z-index:120;transition:width .16s ease}
+.snav.open{width:204px;box-shadow:7px 0 0 var(--shadow)}
+.snav-toggle{background:transparent;border:2px solid rgba(240,236,226,.28);color:var(--paper);border-radius:var(--radius);height:40px;min-height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;padding:0 9px}
+.snav-toggle:hover{background:rgba(240,236,226,.1)}
+.snav-toggle .lb{font-family:'Space Grotesk';font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--amber);white-space:nowrap;opacity:0;width:0;overflow:hidden}
+.snav.open .snav-toggle{justify-content:flex-start}.snav.open .snav-toggle .lb{opacity:1;width:auto}
+.snav nav{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.snav nav a{display:flex;align-items:center;gap:12px;color:#cfcabb;text-decoration:none;padding:10px 9px;border:2px solid transparent;border-radius:var(--radius);white-space:nowrap;overflow:hidden}
+.snav nav a .ic{flex:0 0 22px;display:flex;align-items:center;justify-content:center}
+.snav nav a .ic svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.9}
+.snav nav a .lb{font-family:'Space Grotesk';font-weight:700;font-size:11px;letter-spacing:.4px;text-transform:uppercase;opacity:0;transition:opacity .12s}
+.snav.open nav a .lb{opacity:1}
+.snav nav a:hover{background:rgba(240,236,226,.1);color:var(--paper)}
+.snav nav a.active{background:var(--amber);color:var(--ink)}
+body{padding-left:78px}
+.brandbar{max-width:1280px;margin:14px auto 0;padding:0 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.brandbar .bl{font-family:'Space Grotesk';font-weight:700;font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--grey)}
+.brandbar .bchip{font-family:'Space Grotesk';font-weight:700;font-size:11px;padding:6px 13px;border:2px solid var(--line);border-radius:20px;cursor:pointer;user-select:none;color:#6b685f;background:var(--card);box-shadow:2px 2px 0 var(--shadow)}
+.brandbar .bchip:hover{background:#f3ead0}
+.brandbar .bchip.on{background:var(--ink);color:var(--paper)}
+@media(max-width:760px){.snav{flex-direction:row;position:sticky;width:auto;height:auto;bottom:auto;align-items:center;padding:8px 12px}.snav.open{width:auto}.snav nav{flex-direction:row;margin-top:0}.snav nav a .lb{opacity:1}body{padding-left:14px}}
 </style>
 </head>
 <body>
 
-<div class="appnav"><div class="appnav-in">
+<div class="snav" id="snav">
+  <button class="snav-toggle" id="snavToggle" aria-label="Toggle menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg><span class="lb">Menu</span></button>
   <nav>
-    <a href="index.html" id="navProducts">Product Delivery</a>
-    <a href="courier.html" class="active">Courier Performance</a>
+    <a href="index.html" id="navProducts"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span class="lb">Product Performance</span></a>
+    <a href="courier.html" class="active"><span class="ic"><svg viewBox="0 0 24 24"><rect x="1" y="6" width="13" height="11" rx="1"/><path d="M14 9h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.7"/><circle cx="17" cy="18.5" r="1.7"/></svg></span><span class="lb">Courier Performance</span></a>
   </nav>
-  <div class="bswitch">
-    <span class="bl">Brand</span>
-    <span class="bchip" data-b="">All</span>
-    <span class="bchip" data-b="Dellulu">Dellulu</span>
-    <span class="bchip" data-b="SnugLlama">SnugLlama</span>
-    <span class="bchip" data-b="Flanq">Flanq</span>
-  </div>
-</div></div>
-
+</div>
 
 <div class="wrap">
 <header class="masthead"><div><h1>Courier //<br>Performance</h1><div class="sub" id="sub">ITL EXPORT · loading…</div></div><div class="tagrow" id="tagrow"></div></header>
 </div>
+<div class="brandbar"><span class="bl">Brand</span><span class="bchip" data-b="">All</span><span class="bchip" data-b="Dellulu">Dellulu</span><span class="bchip" data-b="SnugLlama">SnugLlama</span><span class="bchip" data-b="Flanq">Flanq</span></div>
 
 <div class="filterbar"><div class="fin">
  <label>From</label><input type="date" id="from"><label>To</label><input type="date" id="to">
@@ -229,13 +234,16 @@ footer{margin-top:40px;border-top:2px dashed var(--grey);padding-top:14px;font-s
   var QS=new URLSearchParams(location.search);
   var b=QS.get('brand')||'';
   var np=document.getElementById('navProducts'); if(np) np.href='index.html'+(b?('?brand='+encodeURIComponent(b)):'');
-  document.querySelectorAll('.appnav .bchip').forEach(function(c){
+  document.querySelectorAll('.brandbar .bchip').forEach(function(c){
     if((c.getAttribute('data-b')||'')===b)c.classList.add('on');
     c.addEventListener('click',function(){
       var v=c.getAttribute('data-b')||'';
       location.href='courier.html'+(v?('?brand='+encodeURIComponent(v)):'');
     });
   });
+  var s=document.getElementById('snav'),t=document.getElementById('snavToggle');
+  if(t)t.addEventListener('click',function(e){e.stopPropagation();s.classList.toggle('open');});
+  document.addEventListener('click',function(e){if(s&&s.classList.contains('open')&&!s.contains(e.target))s.classList.remove('open');});
 })();
 </script>
 
@@ -318,7 +326,6 @@ function byCourier(rows){const g={};CO.forEach(c=>g[c]=[]);for(const o of rows)g
 
 let CH={};
 function initCharts(){
- CH.outcome=new Chart(chOutcome,{type:'doughnut',data:{labels:['Delivered','RTO','In-flight','Cancelled'],datasets:[{data:[0,0,0,0],backgroundColor:[C.green,C.red,C.blue,C.grey],borderColor:C.card,borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'56%',plugins:{legend:{display:false},tooltip:Object.assign({},tip,{callbacks:{label:c=>' '+c.label+': '+c.raw}})}}});
  CH.trend=new Chart(chTrend,{data:{labels:[],datasets:[
    {type:'bar',label:'Orders',data:[],yAxisID:'y1',backgroundColor:'rgba(63,114,190,.30)',borderColor:C.blue,borderWidth:1.5,borderRadius:3,order:2},
    {type:'line',label:'Delivery %',data:[],yAxisID:'y',borderColor:C.greenD,borderWidth:2.5,tension:.18,pointStyle:'rectRounded',pointRadius:5,pointBackgroundColor:[],pointBorderColor:C.line,pointBorderWidth:1.4,order:1}]},
@@ -364,7 +371,7 @@ function render(lo,hi){
  const ragLabel=c=>c==='g'?'<span class="rag g">on target</span>':c==='a'?'<span class="rag a">near</span>':c==='r'?'<span class="rag r">off target</span>':'';
  document.getElementById('kpis').innerHTML=kp.map(x=>`<div class="card"><div class="topbar bg-${x.b==='g'?'green':x.b==='a'?'amber':x.b==='r'?'red':x.b}"></div><div class="kix">${x.ix}</div><div class="klabel">${x.l}</div><div class="kval ${x.b==='g'?'kpi-green':x.b==='r'?'kpi-red':x.b==='a'?'':''}" style="${x.b==='g'?'color:var(--greenD)':x.b==='r'?'color:var(--redD)':x.b==='a'?'color:var(--amberD)':''}">${x.v}</div><div class="krow"><span class="tgt">${x.tg}</span> ${['g','a','r'].includes(x.b)?ragLabel(x.b):''} ${x.dl}</div><div class="ksub">${x.s}</div>${x.pay||''}</div>`).join('');
  // outcome donut
- if(CH.outcome){CH.outcome.data.datasets[0].data=[ov.d,ov.r,ov.inf,ov.canc];CH.outcome.update('none');}
+ if(HASCHART){if(CH.outcome)CH.outcome.destroy();CH.outcome=new Chart(chOutcome,{type:'doughnut',data:{labels:['Delivered','RTO','In-flight','Cancelled'],datasets:[{data:[ov.d,ov.r,ov.inf,ov.canc],backgroundColor:[C.green,C.red,C.blue,C.grey],borderColor:C.card,borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'56%',animation:false,plugins:{legend:{display:false},tooltip:Object.assign({},tip,{callbacks:{label:c=>' '+c.label+': '+c.raw}})}}});}
  document.getElementById('outLeg').innerHTML=[['Delivered',ov.d,C.green],['RTO',ov.r,C.red],['In-flight',ov.inf,C.blue],['Cancelled',ov.canc,C.grey]].map(x=>`<span><span class="swatch" style="background:${x[2]}"></span>${x[0]} ${x[1]}</span>`).join('');
  // weekly trend
  const wk={};for(const o of rows){const dd=di2d(o[DT]);const day=(dd.getDay()+6)%7;dd.setDate(dd.getDate()-day);const key=d2di(dd);(wk[key]=wk[key]||{n:0,d:0,c:0}).n++;if(o[ST]==0){wk[key].d++;wk[key].c++;}else if(o[ST]==1)wk[key].c++;}
@@ -402,18 +409,21 @@ function renderProducts(bc,total,T){let shown=0;
  const html=bc.map((o,i)=>{const pg={};for(const r of o.rows){const p=PR[r[PI]];(pg[p]=pg[p]||[]).push(r);}
    let prods=Object.entries(pg).filter(([pn,pr])=>pr.length>=MINORD);if(PRODFILTER!=='__all__')prods=prods.filter(([pn])=>pn===PRODFILTER);
    prods.sort((a,b)=>b[1].length-a[1].length);if(!prods.length)return '';
-   const x=metrics(o.rows);const share=Math.round(1000*o.rows.length/total)/10;const band=ragHi(x.dr,T.dr);
-   const zs=speedByDim(o.rows,ZI,CARDZ);let zc='';CARDZ.forEach(z=>{const v=zs[z];zc+=`<div class="zc f-${spdC(v.m)}"><div class="zk">${z}</div><div class="zv">${v.m==null?'—':v.m}</div><small>${v.n||''}</small></div>`;});
+   const fRows=PRODFILTER==='__all__'?o.rows:o.rows.filter(r=>PR[r[PI]]===PRODFILTER);if(!fRows.length)return '';
+   const x=metrics(fRows);const share=Math.round(1000*fRows.length/total)/10;const band=ragHi(x.dr,T.dr);
+   const zs=speedByDim(fRows,ZI,CARDZ);let zc='';CARDZ.forEach(z=>{const v=zs[z];zc+=`<div class="zc f-${spdC(v.m)}"><div class="zk">${z}</div><div class="zv">${v.m==null?'—':v.m}</div><small>${v.n||''}</small></div>`;});
    const tot=x.d+x.r+x.inf+x.canc||1;
    const ob=`<div class="obar"><i style="width:${100*x.d/tot}%;background:${C.green}"></i><i style="width:${100*x.r/tot}%;background:${C.red}"></i><i style="width:${100*x.inf/tot}%;background:${C.blue}"></i><i style="width:${100*x.canc/tot}%;background:${C.grey}"></i></div><div class="obar-leg"><span><i style="background:${C.green}"></i>Dlv ${x.d}</span><span><i style="background:${C.red}"></i>RTO ${x.r}</span><span><i style="background:${C.blue}"></i>Flight ${x.inf}</span><span><i style="background:${C.grey}"></i>Canc ${x.canc}</span></div>`;
    const pm=`<div class="pmwrap"><div class="pmrow"><span class="pml">Prepaid DR</span><span class="pmbar"><i style="width:${x.drPre||0}%;background:${C.greenD}"></i></span><b class="t-${drC(x.drPre)}">${fmt(x.drPre,'%')}</b></div><div class="pmrow"><span class="pml">COD DR</span><span class="pmbar"><i style="width:${x.drCod||0}%;background:${C.amberD}"></i></span><b class="t-${drC(x.drCod)}">${fmt(x.drCod,'%')}</b></div></div>`;
    const st=[['RTO',fmt(x.rto,'%'),x.rto==null?'na':(x.rto<=T.rto?'g':x.rto<=T.rto*1.3?'a':'r')],['Med p→d',x.spd==null?'—':x.spd+'d',spdC(x.spd)],['Breach',fmt(x.brh,'%'),brC(x.brh)],['Avg frt',inr(x.frAvgShipped),''],['NDR rec',fmt(x.ndrRec,'%'),ndC(x.ndrRec)]];
    const score=`<div class="cscore"><div class="csA"><div class="chero"><div class="big t-${band}">${fmt(x.dr,'%')}</div><div class="bl">delivery<br>rate</div></div><div class="meter"><span style="width:${x.dr||0}%;background:${bandCol(band)}"></span></div>${ob}</div><div class="csB">${pm}<div class="statrow">${st.map(s=>`<div class="stat ${s[2]?'f-'+s[2]:''}"><div class="sl">${s[0]}</div><div class="sv">${s[1]}</div></div>`).join('')}</div></div><div class="csC"><div class="zstrip"><div class="zt">Median pickup→delivery by zone (days · n)</div><div class="zcells">${zc}</div></div></div></div>`;
-   const chips=`<span class="csum"><b class="t-${band}">DR ${fmt(x.dr,'%')}</b><span>RTO ${fmt(x.rto,'%')}</span><span>${x.spd==null?'—':x.spd+'d'}</span><span>Brh ${fmt(x.brh,'%')}</span><span>COD-DR ${fmt(x.drCod,'%')}</span><span>${inr(x.frAvgShipped)}/o</span></span>`;
+   const dCol=v=>v==='g'?C.green:v==='a'?C.amber:v==='r'?'#E27A6A':'#e7e3d8';
+   const rtoBand=x.rto==null?'na':(x.rto<=T.rto?'g':x.rto<=T.rto*1.3?'a':'r'),codBand=drC(x.drCod);
+   const chips=`<span class="csum"><b style="color:${dCol(band)}">DR ${fmt(x.dr,'%')}</b><span style="color:${dCol(rtoBand)}">RTO ${fmt(x.rto,'%')}</span><span>${x.spd==null?'—':x.spd+'d'}</span><span>Brh ${fmt(x.brh,'%')}</span><span style="color:${dCol(codBand)}">COD-DR ${fmt(x.drCod,'%')}</span><span>${inr(x.frAvgShipped)}/o</span></span>`;
    const rowsH=prods.map(([pn,pr])=>{const px=metrics(pr);const zs2=speedByDim(pr,ZI,CARDZ);shown++;
      let zm='';CARDZ.forEach(z=>{const v=zs2[z];zm+=`<i class="f-${spdC(v.m)}" title="Zone ${z}: ${v.m==null?'n/a':v.m+'d'}">${v.m==null?'·':v.m}</i>`;});
-     return `<details class="prod"><summary class="prow"><div class="pcar">▸</div><div class="pn"><div class="nm">${pn}</div><div class="sub">${px.n} ord · ${Math.round(1000*px.n/o.rows.length)/10}%</div></div>${pcell('Del. rate',fmt(px.dr,'%'),drC(px.dr),px.dr,bandCol(drC(px.dr)))}${pcell('RTO',fmt(px.rto,'%'),px.rto==null?'na':(px.rto<=20?'g':px.rto<=30?'a':'r'))}${pcell('Med p→d',px.spd==null?'—':px.spd+'d',spdC(px.spd))}${pcell('Breach',fmt(px.brh,'%'),brC(px.brh))}${pcell('Billed kg',(px.bwKg||0).toFixed(2),px.overPct>=80?'r':px.overPct>=50?'a':'')}${pcell('Avg frt',inr(px.frAvgShipped),'')}<div class="pc zg"><div class="l">Zone A→E</div><div class="zmini">${zm}</div></div></summary>${prodDetail(pr)}</details>`;}).join('');
-   return `<details class="pcourier"><summary><span class="snm">${o.c}</span>${chips}<span class="sst">${o.rows.length.toLocaleString('en-IN')} ord · ${prods.length} prod</span></summary>${score}<div class="plist">${rowsH}</div></details>`;}).join('');
+     return `<details class="prod"><summary class="prow"><div class="pcar">▸</div><div class="pn"><div class="nm">${pn}</div><div class="sub">${px.n} ord · ${Math.round(1000*px.n/fRows.length)/10}%</div></div>${pcell('Del. rate',fmt(px.dr,'%'),drC(px.dr),px.dr,bandCol(drC(px.dr)))}${pcell('RTO',fmt(px.rto,'%'),px.rto==null?'na':(px.rto<=20?'g':px.rto<=30?'a':'r'))}${pcell('Med p→d',px.spd==null?'—':px.spd+'d',spdC(px.spd))}${pcell('Breach',fmt(px.brh,'%'),brC(px.brh))}${pcell('Billed kg',(px.bwKg||0).toFixed(2),px.overPct>=80?'r':px.overPct>=50?'a':'')}${pcell('Avg frt',inr(px.frAvgShipped),'')}<div class="pc zg"><div class="l">Zone A→E</div><div class="zmini">${zm}</div></div></summary>${prodDetail(pr)}</details>`;}).join('');
+   return `<details class="pcourier"><summary><span class="snm">${o.c}</span>${chips}<span class="sst">${fRows.length.toLocaleString('en-IN')} ord · ${prods.length} prod</span></summary>${score}<div class="plist">${rowsH}</div></details>`;}).join('');
  document.getElementById('prod').innerHTML=html||'<div class="note">No products match this filter / threshold in the window.</div>';
  document.getElementById('prodcount').textContent=shown+' PRODUCT CARDS';
 }
