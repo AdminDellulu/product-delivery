@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Courier Performance — Dellulu Ops</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--ink:#2B2B28;--line:#3C3B36;--paper:#F0ECE2;--card:#FCFBF7;--shadow:rgba(43,43,40,.18);
+ --green:#2F9D62;--greenD:#21794B;--red:#D24A3C;--redD:#A6362A;--redDD:#7A2018;--amber:#E0A93A;--amberD:#B98424;
+ --blue:#3F72BE;--purple:#6B5B95;--grey:#A7A296;--radius:6px;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:'Space Mono',ui-monospace,Menlo,monospace;line-height:1.45;font-size:13px;padding:0 0 64px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 20px}
+h1,h2,h3,h4,.disp{font-family:'Space Grotesk',Arial,sans-serif}
+b{font-weight:700}
+header.masthead{border:2px solid var(--line);background:var(--ink);color:var(--paper);padding:22px 26px;box-shadow:5px 5px 0 var(--shadow);border-radius:var(--radius);margin:26px 0 0;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px}
+header.masthead h1{font-size:clamp(24px,4.2vw,40px);line-height:1;letter-spacing:-.5px;text-transform:uppercase;font-weight:700}
+header.masthead .sub{font-size:11.5px;margin-top:10px;color:var(--amber);letter-spacing:.4px}
+.tagrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.tag{border:1.5px solid rgba(240,236,226,.5);padding:5px 10px;font-size:11px;border-radius:4px;letter-spacing:.3px;white-space:nowrap}
+.tag.solid{background:var(--amber);color:var(--ink);border-color:var(--amber);font-weight:700}
+.tag.g{background:var(--green);color:#fff;border-color:var(--greenD);font-weight:700}
+.tag.r{background:var(--red);color:#fff;border-color:var(--redD);font-weight:700}
+.tag.p{background:var(--purple);color:#fff;border-color:#4f4470;font-weight:700}
+.filterbar{position:sticky;top:0;z-index:40;background:var(--paper);border-bottom:2px solid var(--line);padding:12px 0;margin-top:18px}
+.fin{max-width:1280px;margin:0 auto;padding:0 20px;display:flex;gap:11px;align-items:center;flex-wrap:wrap}
+.fin label{font-family:'Space Grotesk';font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;color:var(--grey)}
+.fin input[type=date],.fin input[type=number],.fin select{font-family:'Space Mono',monospace;font-size:12.5px;border:2px solid var(--line);background:#fff;padding:5px 8px;border-radius:4px;box-shadow:2px 2px 0 var(--shadow)}
+.fin input[type=number]{width:58px}
+.preset{font-family:'Space Grotesk';font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border:2px solid var(--line);background:var(--card);padding:6px 11px;cursor:pointer;border-radius:4px;box-shadow:2px 2px 0 var(--shadow)}
+.preset:hover{background:#f3ead0}.preset.on{background:var(--ink);color:var(--paper)}
+.frange{margin-left:auto;font-family:'Space Grotesk';font-size:11.5px;font-weight:700;background:#e9eff8;border:2px solid var(--blue);color:var(--blue);padding:5px 11px;border-radius:4px}
+/* maturity banner */
+.matbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:2px solid var(--line);border-radius:var(--radius);box-shadow:4px 4px 0 var(--shadow);padding:11px 16px;margin-top:18px;font-size:12px;font-weight:700;font-family:'Space Grotesk'}
+.matbar.mg{background:#e7f3ec;border-color:var(--greenD)}.matbar.ma{background:#f8efd4;border-color:var(--amberD)}.matbar.mr{background:#fbe6e1;border-color:var(--redD)}
+.matbar .mpill{font-size:11px;padding:3px 9px;border-radius:4px;border:1.5px solid var(--line)}
+.matbar .mg2{background:var(--green);color:#fff}.matbar .ma2{background:var(--amber)}.matbar .mr2{background:var(--red);color:#fff}
+.matbar .mnote{font-weight:400;font-family:'Space Mono';color:#5a574f;font-size:11px}
+.seclabel{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:1px;text-transform:uppercase;margin:34px 0 15px;display:flex;align-items:center;gap:10px;color:var(--line)}
+.seclabel::before{content:"";display:inline-block;width:11px;height:11px;background:var(--amber);border:1.5px solid var(--line);border-radius:2px}
+.seclabel .ix{color:var(--grey);font-weight:400}
+.lead{font-size:11.5px;color:#5a574f;margin:-8px 0 16px;max-width:940px}
+.grid{display:grid;gap:16px}.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:980px){.g4{grid-template-columns:repeat(2,1fr)}.g3,.g2{grid-template-columns:1fr}}
+@media(max-width:560px){.g4{grid-template-columns:1fr}}
+.card{background:var(--card);border:2px solid var(--line);box-shadow:4px 4px 0 var(--shadow);border-radius:var(--radius);padding:18px;overflow:hidden}
+.card .kix{font-size:10px;letter-spacing:.5px;color:var(--grey);font-weight:700}
+.card .klabel{font-family:'Space Grotesk';font-weight:600;font-size:12.5px;letter-spacing:.2px;margin-top:3px}
+.card .kval{font-family:'Space Grotesk';font-weight:700;font-size:clamp(26px,4vw,40px);line-height:1;margin:11px 0 5px;font-variant-numeric:tabular-nums}
+.card .ksub{font-size:11px;color:#5a574f}
+.kpi-green .kval{color:var(--greenD)}.kpi-red .kval{color:var(--redD)}.kpi-blue .kval{color:var(--blue)}.kpi-money .kval{color:var(--greenD)}
+.topbar{height:6px;margin:-18px -18px 14px;border-bottom:2px solid var(--line)}
+.bg-green{background:var(--green)}.bg-red{background:var(--red)}.bg-amber{background:var(--amber)}.bg-blue{background:var(--blue)}.bg-ink{background:var(--ink)}.bg-purple{background:var(--purple)}.bg-grey{background:var(--grey)}
+.krow{display:flex;align-items:center;gap:8px;margin:2px 0 4px;flex-wrap:wrap}
+.tgt{font-size:10px;font-weight:700;font-family:'Space Grotesk';color:#6b685f}
+.rag{font-size:9px;padding:1px 6px;border-radius:3px;border:1.5px solid var(--line);text-transform:uppercase;font-weight:700}
+.rag.g{background:var(--green);color:#fff;border-color:var(--greenD)}.rag.a{background:var(--amber)}.rag.r{background:var(--red);color:#fff;border-color:var(--redD)}
+.delta{font-size:11px;font-weight:700;font-family:'Space Grotesk';margin-left:auto}
+.delta.up{color:var(--greenD)}.delta.dn{color:var(--redD)}.delta.fl{color:var(--grey)}
+.paysub{display:flex;gap:8px;margin-top:10px;padding-top:8px;border-top:1.5px dashed #d8d2c4}
+.paysub .ps{flex:1}.paysub .pl{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--grey);font-weight:700;font-family:'Space Grotesk'}
+.paysub .pv{font-family:'Space Grotesk';font-weight:700;font-size:16px;line-height:1.1}
+.chartcard{background:var(--card);border:2px solid var(--line);box-shadow:4px 4px 0 var(--shadow);border-radius:var(--radius);padding:16px 18px 18px}
+.chartcard h3,.chartcard h4{font-size:13.5px;letter-spacing:.2px;margin-bottom:3px;font-weight:600}
+.chartcard .cdesc{font-size:10.5px;color:#5e5b53;margin-bottom:12px}
+.canee{position:relative;width:100%}.h-mid{height:300px}.h-low{height:240px}
+.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:10.5px;margin-top:11px;color:#4a4740}
+.legend span{display:inline-flex;align-items:center;gap:6px}.swatch{width:12px;height:12px;border:1.5px solid var(--line);display:inline-block;border-radius:2px}
+/* weight bars */
+.wbar{display:flex;align-items:center;gap:9px;margin-bottom:8px;font-size:11px}
+.wbar .wl{width:96px;font-family:'Space Grotesk';font-weight:700;font-size:10px;text-transform:uppercase;color:#5a574f}
+.wbar .wt{flex:1;height:15px;background:#e7e2d6;border:1.5px solid var(--line);border-radius:3px;overflow:hidden}
+.wbar .wt>i{display:block;height:100%}
+.wbar b{width:54px;text-align:right;font-family:'Space Grotesk';font-size:12px}
+.est{color:var(--amberD);font-weight:700;font-size:9px;border:1.5px solid var(--amberD);border-radius:3px;padding:0 4px;margin-left:5px;font-family:'Space Grotesk'}
+.finrow{display:flex;justify-content:space-between;gap:10px;padding:7px 1px;border-bottom:1.5px dashed #ddd7c8;font-size:12px}.finrow:last-child{border-bottom:0}.finrow b{font-family:'Space Grotesk'}
+/* courier scorecards */
+.ccard{background:var(--card);border:2px solid var(--line);box-shadow:4px 4px 0 var(--shadow);border-radius:var(--radius);padding:16px 17px;overflow:hidden}
+.ccard .ctop{display:flex;justify-content:space-between;align-items:flex-start}
+.ccard .cnm{font-family:'Space Grotesk';font-weight:700;font-size:19px;text-transform:uppercase;line-height:1}
+.ccard .cvol{font-family:'Space Grotesk';font-size:11px;font-weight:700;text-align:right;color:#5a574f}
+.ccard .chero{display:flex;align-items:baseline;gap:9px;margin:9px 0 2px}
+.ccard .chero .big{font-family:'Space Grotesk';font-weight:700;font-size:38px;line-height:.9}
+.ccard .chero .bl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--grey);font-weight:700;line-height:1.1}
+.meter{height:9px;background:#e7e2d6;border:1.5px solid var(--line);border-radius:3px;margin-top:9px;overflow:hidden}.meter>span{display:block;height:100%}
+.obar{display:flex;height:15px;border:1.5px solid var(--line);border-radius:3px;overflow:hidden;margin-top:12px}.obar i{display:block;height:100%}
+.obar-leg{display:flex;gap:10px;flex-wrap:wrap;font-size:9px;margin-top:5px;color:#6b685f;font-weight:700;font-family:'Space Grotesk';text-transform:uppercase;letter-spacing:.3px}
+.obar-leg i{display:inline-block;width:9px;height:9px;border:1px solid var(--line);border-radius:2px;vertical-align:-1px;margin-right:3px}
+.pmwrap{margin-top:12px;display:grid;gap:6px}
+.pmrow{display:flex;align-items:center;gap:8px;font-size:11px}
+.pmrow .pml{width:62px;font-family:'Space Grotesk';font-weight:700;font-size:9.5px;text-transform:uppercase;color:#5a574f}
+.pmrow .pmbar{flex:1;height:13px;background:#e7e2d6;border:1.5px solid var(--line);border-radius:3px;overflow:hidden}.pmrow .pmbar>i{display:block;height:100%}
+.pmrow b{width:42px;text-align:right;font-family:'Space Grotesk';font-size:12px}
+.statrow{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:13px}
+.stat{border:1.5px solid var(--line);border-radius:4px;padding:6px 5px;text-align:center;background:#fff}
+.stat .sl{font-size:8px;text-transform:uppercase;letter-spacing:.3px;color:var(--grey);font-weight:700;line-height:1.1;min-height:18px;font-family:'Space Grotesk'}
+.stat .sv{font-family:'Space Grotesk';font-weight:700;font-size:15px;margin-top:2px;line-height:1}
+.zstrip{margin-top:12px}.zstrip .zt{font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:var(--grey);font-weight:700;margin-bottom:5px;font-family:'Space Grotesk'}
+.zcells{display:flex;gap:5px}.zc{flex:1;border:1.5px solid var(--line);border-radius:3px;text-align:center;padding:4px 0}
+.zc .zk{font-size:8.5px;font-weight:700;color:#5a574f}.zc .zv{font-family:'Space Grotesk';font-weight:700;font-size:13px;line-height:1}.zc small{font-size:7px;color:#7c786d}
+.f-g{background:#d9efe1}.f-a{background:#f7ecc8}.f-r{background:#f4d5cf}.f-na{background:#ebe7db;color:var(--grey)}
+.t-g{color:var(--greenD)}.t-a{color:var(--amberD)}.t-r{color:var(--redD)}
+/* products */
+.pfilter{display:flex;gap:11px;align-items:center;flex-wrap:wrap;margin:-6px 0 16px}
+.pcourier{border:2px solid var(--line);box-shadow:4px 4px 0 var(--shadow);border-radius:var(--radius);margin-bottom:15px;background:var(--card);overflow:hidden}
+.pcourier>summary{cursor:pointer;list-style:none;padding:12px 16px;display:flex;align-items:center;gap:12px;background:var(--ink);color:var(--paper)}
+.pcourier>summary::-webkit-details-marker{display:none}
+.pcourier>summary:before{content:"[+]";font-weight:700;font-family:'Space Mono'}
+.pcourier[open]>summary:before{content:"[\2212]"}
+.pcourier>summary .snm{font-family:'Space Grotesk';font-weight:700;font-size:16px;text-transform:uppercase}
+.pcourier>summary .sst{font-size:10.5px;margin-left:auto;color:#cfcabb;font-weight:700;font-family:'Space Grotesk';white-space:nowrap}
+.csum{display:flex;gap:6px;flex-wrap:wrap;margin-left:14px;align-items:center}
+.csum b,.csum span{font-family:'Space Grotesk';font-weight:700;font-size:11px;background:rgba(240,236,226,.14);border:1px solid rgba(240,236,226,.3);padding:2px 7px;border-radius:4px;color:#e7e3d8}
+.csum b{color:#fff}
+.cscore{display:grid;grid-template-columns:1.05fr 1.25fr 1fr;gap:18px;padding:15px 17px;border-bottom:2px solid var(--line);background:#fbf8ef}
+.cscore .chero{margin-top:0}
+@media(max-width:900px){.csum{display:none}.cscore{grid-template-columns:1fr}}
+.plist{padding:13px 14px;overflow-x:auto}
+.prod{margin-bottom:9px;min-width:820px}
+.prow{display:flex;align-items:stretch;border:1.5px solid var(--line);border-radius:5px;background:#fff;overflow:hidden;cursor:pointer;list-style:none}
+.prod[open] .prow{border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:0}
+.prow::-webkit-details-marker{display:none}
+.prow .pcar{flex:0 0 26px;display:flex;align-items:center;justify-content:center;background:var(--card);border-right:1.5px solid var(--line);font-family:'Space Grotesk';font-weight:700;color:var(--amberD)}
+.prod[open] .prow .pcar{background:var(--amber);color:var(--ink)}
+.prow .pn{flex:0 0 180px;padding:9px 13px;display:flex;flex-direction:column;justify-content:center;border-right:1.5px solid var(--line);background:var(--card)}
+.prow .pn .nm{font-family:'Space Grotesk';font-weight:700;font-size:12.5px;line-height:1.15;text-transform:uppercase}
+.prow .pn .sub{font-size:9.5px;color:#7c786d;margin-top:3px;font-weight:700}
+.prow .pc{flex:1;min-width:56px;padding:7px 6px;text-align:center;border-right:1px solid #e2ddcf;display:flex;flex-direction:column;justify-content:center}
+.prow .pc:last-child{border-right:0}
+.prow .pc .l{font-size:8px;text-transform:uppercase;letter-spacing:.2px;color:var(--grey);font-weight:700;line-height:1.05;min-height:16px;font-family:'Space Grotesk'}
+.prow .pc .v{font-family:'Space Grotesk';font-weight:700;font-size:15px;margin-top:2px;line-height:1}
+.prow .pc.zg{flex:0 0 120px}
+.zmini{display:flex;gap:3px;margin-top:3px;justify-content:center}.zmini i{width:17px;border:1px solid var(--line);border-radius:2px;font-size:8.5px;font-weight:700;font-family:'Space Grotesk';text-align:center;line-height:15px;display:block}
+.drcellbar{height:5px;background:#e7e2d6;border-radius:2px;margin-top:4px;overflow:hidden}.drcellbar>i{display:block;height:100%}
+.pdetail{border:1.5px solid var(--line);border-top:0;border-radius:0 0 5px 5px;background:#fbf8ef;padding:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+@media(max-width:900px){.pdetail{grid-template-columns:1fr}}
+.dpanel{border:1.5px solid var(--line);border-radius:5px;background:#fff;padding:11px 13px}
+.dpanel h4{font-family:'Space Grotesk';font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--grey);margin-bottom:9px;font-weight:700}
+.psplit{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.psbox{border:1.5px solid var(--line);border-radius:4px;padding:8px 9px}.psbox.ppd{border-left:5px solid var(--greenD)}.psbox.cod{border-left:5px solid var(--amberD)}
+.psbox .pt{font-family:'Space Grotesk';font-weight:700;font-size:10px;text-transform:uppercase;color:#5a574f}
+.psbox .pr{display:flex;justify-content:space-between;font-size:11px;margin-top:5px}.psbox .pr b{font-family:'Space Grotesk';font-size:13px}
+.volbar2{display:flex;height:22px;border:1.5px solid var(--line);border-radius:4px;overflow:hidden;margin-top:10px;font-family:'Space Grotesk';font-weight:700;font-size:10px}.volbar2 div{display:flex;align-items:center;justify-content:center;color:#fff}
+.zgrid{display:flex;gap:5px;flex-wrap:wrap}.zgrid .zc{min-width:42px}
+.drow{display:flex;justify-content:space-between;font-size:11.5px;padding:5px 1px;border-bottom:1px dashed #ddd7c8}.drow:last-child{border-bottom:0}.drow b{font-family:'Space Grotesk'}
+/* pincode table */
+table{width:100%;border-collapse:collapse;font-size:12px;background:var(--card);border:2px solid var(--line);box-shadow:4px 4px 0 var(--shadow);border-radius:var(--radius);overflow:hidden}
+th,td{padding:7px 9px;text-align:right;border:1px solid #e2ddcf;font-variant-numeric:tabular-nums}
+th{background:var(--ink);color:var(--paper);text-transform:uppercase;font-size:9.5px;letter-spacing:.4px;font-family:'Space Grotesk';font-weight:600;border-color:var(--line)}
+td:first-child,th:first-child,td.l,th.l{text-align:left}
+.conf{font-size:8.5px;padding:1px 6px;border:1.5px solid var(--line);text-transform:uppercase;font-weight:700;border-radius:3px;font-family:'Space Grotesk'}
+.conf.hi{background:var(--red);color:#fff;border-color:var(--redD)}.conf.md{background:var(--amber)}.conf.lo{background:#e4e1d6;color:#6b685f}.conf.ok{background:var(--green);color:#fff;border-color:var(--greenD)}
+#pintable{overflow-x:auto}#pintable table{min-width:980px}
+.psort:hover{background:#444;cursor:pointer}
+.note{background:#F8F1DE;border:2px solid var(--amberD);border-left:7px solid var(--amberD);border-radius:var(--radius);box-shadow:4px 4px 0 var(--shadow);padding:13px 16px;margin-top:14px;font-size:12px;color:#4a4740}.note b{color:var(--ink)}
+footer{margin-top:40px;border-top:2px dashed var(--grey);padding-top:14px;font-size:10.5px;color:#6b685f;line-height:1.7}
+</style>
+<style>
+.appnav{position:sticky;top:0;z-index:80;background:var(--ink);color:var(--paper);border-bottom:2px solid var(--line)}
+.appnav-in{max-width:1280px;margin:0 auto;padding:9px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.appnav .mark{font-family:'Space Grotesk';font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--amber)}
+.appnav nav{display:flex;gap:6px;flex-wrap:wrap}
+.appnav nav a{font-family:'Space Grotesk';font-weight:700;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:#cfcabb;text-decoration:none;padding:6px 11px;border:1.5px solid transparent;border-radius:5px}
+.appnav nav a:hover{background:rgba(240,236,226,.1)}
+.appnav nav a.active{background:var(--amber);color:var(--ink);border-color:var(--amber)}
+.appnav .bswitch{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.appnav .bswitch .bl{font-family:'Space Grotesk';font-weight:700;font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--grey)}
+.appnav .bchip{font-family:'Space Grotesk';font-weight:700;font-size:11px;padding:5px 11px;border:1.5px solid rgba(240,236,226,.4);border-radius:20px;cursor:pointer;user-select:none;color:#e7e3d8}
+.appnav .bchip:hover{background:rgba(240,236,226,.12)}
+.appnav .bchip.on{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.filterbar{top:46px}
+</style>
+</head>
+<body>
+
+<div class="appnav"><div class="appnav-in">
+  <span class="mark">Dellulu Ops · Logistics</span>
+  <nav>
+    <a href="index.html" id="navProducts">Product Delivery</a>
+    <a href="courier.html" class="active">Courier Performance</a>
+  </nav>
+  <div class="bswitch">
+    <span class="bl">Brand</span>
+    <span class="bchip" data-b="">All</span>
+    <span class="bchip" data-b="Dellulu">Dellulu</span>
+    <span class="bchip" data-b="SnugLlama">SnugLlama</span>
+    <span class="bchip" data-b="Flanq">Flanq</span>
+  </div>
+</div></div>
+
+
+<div class="wrap">
+<header class="masthead"><div><h1>SnugLlama // Courier Performance</h1><div class="sub" id="sub">ITL EXPORT · loading…</div></div><div class="tagrow" id="tagrow"></div></header>
+</div>
+
+<div class="filterbar"><div class="fin">
+ <label>From</label><input type="date" id="from"><label>To</label><input type="date" id="to">
+ <button class="preset" data-d="all">All</button><button class="preset" data-d="90">90D</button><button class="preset" data-d="30">30D</button>
+ <span style="width:14px"></span>
+ <label>Targets DR≥</label><input type="number" id="tDR" value="85"><label>RTO≤</label><input type="number" id="tRTO" value="15"><label>Breach≤</label><input type="number" id="tBR" value="5"><label>Speed≤</label><input type="number" id="tSP" value="4">
+ <span class="frange" id="frange"></span>
+</div></div>
+
+<div class="wrap">
+ <div class="matbar" id="matbar"></div>
+
+ <div class="seclabel"><span class="ix">01 /</span>&nbsp;Headline numbers</div>
+ <p class="lead">Delivery rate = delivered ÷ concluded (in-flight excluded). Each card shows your target (RAG) and the change vs the prior equal-length window (▲ = improving). Median speed is <b>pickup→delivery</b>. Prepaid/COD split exposes the COD penalty.</p>
+ <div class="grid g3" id="kpis"></div>
+ <div class="grid g3" style="margin-top:16px">
+   <div class="chartcard"><h3>Order outcomes</h3><div class="cdesc">Where every order in the window landed.</div><div class="canee h-low"><canvas id="chOutcome"></canvas></div><div class="legend" id="outLeg"></div></div>
+   <div class="chartcard"><h3>Weekly volume &amp; delivery rate</h3><div class="cdesc">Bars = orders, line = delivery rate; dots turn <b style="color:var(--redD)">red</b> below 70%.</div><div class="canee h-mid"><canvas id="chTrend"></canvas></div></div>
+   <div class="chartcard"><h4>Freight &amp; weight — overbilling</h4><div class="cdesc">ITL bills above your chargeable weight. Avg billed vs chargeable, % overbilled, est. recoverable.</div><div id="wpanel"></div></div>
+ </div>
+
+ <div class="seclabel"><span class="ix">02 /</span>&nbsp;Couriers &amp; products</div>
+ <p class="lead">Each carrier is a panel: its scorecard — delivery rate vs target, RTO, speed, breach, freight, NDR, Prepaid-vs-COD, zone speed — sits at the top, with every product it moved as a horizontal card below. Key numbers also show in the collapsed header. Click a carrier to open, a product to expand. Filter to one product to compare it across carriers.</p>
+ <div class="pfilter"><label>Product</label><select id="prodfilter"></select><label>Min orders</label><select id="minord"><option value="1" selected>1+</option><option value="5">5+</option><option value="10">10+</option><option value="25">25+</option></select><span class="frange" id="prodcount" style="margin-left:0"></span></div>
+ <div id="prod"></div>
+
+ <div class="seclabel"><span class="ix">03 /</span>&nbsp;Pincode RTO blacklist — confidence-ranked</div>
+ <p class="lead">Ranked by a statistical <b>floor</b> (Wilson 95% lower bound), not raw RTO% — so an 11-order pincode at 54% can't outrank one with stronger evidence. <b>Decide on the whole row, not RTO% alone:</b> Total &amp; Delivered show what you'd lose by blocking; <b>COD-RTO%</b> against the national prepaid baseline (~2%) shows whether COD is the cause; the <b>Action</b> column recommends the surgical fix — usually <b>COD→prepaid-only</b>, which stops the RTO bleed while keeping the prepaid orders. Click any column header to sort (click again to reverse).</p>
+ <div class="pfilter"><label>Min orders</label><select id="pinmin"><option value="5">5+</option><option value="10" selected>10+</option><option value="15">15+</option><option value="20">20+</option></select><label>Min products</label><select id="pinprod"><option value="1">1+</option><option value="2" selected>2+</option><option value="3">3+</option></select><button class="preset" id="dlPins">⤓ Action pincodes (comma)</button><button class="preset" id="dlCsv">⤓ Full CSV</button><span class="frange" id="pincount" style="margin-left:0"></span></div>
+ <div id="pintable"></div>
+
+ <footer id="foot"></footer>
+</div>
+
+
+
+<script>
+(function(){
+  var QS=new URLSearchParams(location.search);
+  var b=QS.get('brand')||'';
+  var np=document.getElementById('navProducts'); if(np) np.href='index.html'+(b?('?brand='+encodeURIComponent(b)):'');
+  document.querySelectorAll('.appnav .bchip').forEach(function(c){
+    if((c.getAttribute('data-b')||'')===b)c.classList.add('on');
+    c.addEventListener('click',function(){
+      var v=c.getAttribute('data-b')||'';
+      location.href='courier.html'+(v?('?brand='+encodeURIComponent(v)):'');
+    });
+  });
+})();
+</script>
+
+
+<script>
+const SUPA_URL='https://amnqeynggnwqktvepulv.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbnFleW5nZ253cWt0dmVwdWx2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjY5OTUsImV4cCI6MjA5MDIwMjk5NX0.7YNuC6ihcaM8Ow31rnp-9IYdIlXiAVzMMU2bBzc-IDk';
+const QS=new URLSearchParams(location.search);
+const BRAND=QS.get('brand')||null;
+async function fetchD(brand){
+  const res=await fetch(SUPA_URL+'/rest/v1/rpc/get_courier_intel',{method:'POST',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({p_brand:brand})});
+  if(!res.ok) throw new Error('RPC '+res.status+': '+(await res.text()));
+  return await res.json();
+}
+(async function(){
+ let D;
+ try{ D=await fetchD(BRAND); }
+ catch(e){ var sb=document.getElementById('sub'); if(sb)sb.textContent='Failed to load data — '+e.message; console.error(e); return; }
+ try{
+  document.querySelector('header.masthead h1').textContent=(D.meta.store||'All Brands')+' // Courier Performance';
+  document.title=(D.meta.store||'All Brands')+' — Courier Performance';
+ }catch(e){}
+
+const CO=D.couriers,PR=D.products,ZO=D.zones,TZ=D.tiers,RS=D.reasons,M=D.meta,ORD=D.orders,PM=D.pinmeta;
+const CI=0,PI=1,ZI=2,TI=3,ST=4,DT=5,TR=6,BR=7,FR=8,AT=9,TT=10,RE=11,PAY=12,PIN=13,EW=14,VW=15,BW=16,FWD=17;
+const CARDZ=ZO.filter(z=>['A','B','C','D','E'].includes(z));
+const C={ink:'#2B2B28',line:'#3C3B36',paper:'#F0ECE2',card:'#FCFBF7',green:'#2F9D62',greenD:'#21794B',red:'#D24A3C',redD:'#A6362A',amber:'#E0A93A',amberD:'#B98424',blue:'#3F72BE',purple:'#6B5B95',grey:'#A7A296'};
+const HASCHART=(typeof Chart!=='undefined');
+if(HASCHART){Chart.defaults.font.family="'Space Mono', monospace";Chart.defaults.font.size=11;Chart.defaults.color=C.ink;}
+const GS="'Space Grotesk'";const gridCfg={color:'rgba(43,43,40,.08)',lineWidth:1};const axB={display:true,color:C.line,width:1.5};
+const tip={backgroundColor:C.ink,borderColor:C.amber,borderWidth:1.5,cornerRadius:4,padding:9};
+
+function med(a){if(!a.length)return null;a=a.slice().sort((x,y)=>x-y);const m=a.length>>1;return a.length%2?a[m]:(a[m-1]+a[m])/2;}
+function pct(n,d){return d?Math.round(1000*n/d)/10:null;}
+function fmt(v,s){return v==null?'—':v+(s||'');}
+function inr(v){return v==null?'—':'₹'+Math.round(v).toLocaleString('en-IN');}
+function inrL(v){return v==null?'—':(v>=100000?'₹'+(v/100000).toFixed(2)+'L':'₹'+Math.round(v).toLocaleString('en-IN'));}
+function drC(v){return v==null?'na':(v>=80?'g':(v>=70?'a':'r'));}
+function spdC(v){return v==null?'na':(v<=3?'g':(v<=6?'a':'r'));}
+function brC(v){return v==null?'na':(v<=5?'g':(v<=12?'a':'r'));}
+function ndC(v){return v==null?'na':(v>=45?'g':(v>=30?'a':'r'));}
+function bandCol(c){return c==='g'?C.greenD:c==='a'?C.amberD:c==='r'?C.redD:C.grey;}
+function di2d(di){return new Date(Math.floor(di/10000),Math.floor(di/100)%100-1,di%100);}
+function d2di(d){return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();}
+function di2iso(di){return `${Math.floor(di/10000)}-${String(Math.floor(di/100)%100).padStart(2,'0')}-${String(di%100).padStart(2,'0')}`;}
+function iso2di(s){const p=s.split('-');return +p[0]*10000+ +p[1]*100+ +p[2];}
+function human(di){return di2d(di).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function wilsonLB(k,n,z){if(!n)return 0;const p=k/n,z2=z*z;return Math.max(0,((p+z2/(2*n)-z*Math.sqrt((p*(1-p)+z2/(4*n))/n))/(1+z2/n)));}
+
+function metrics(rows){
+ let d=0,r=0,inf=0,canc=0,brN=0,brD=0,frSum=0,frN=0,ndD=0,ndR=0,cod=0,pre=0,realised=0,gmv=0;
+ let dPre=0,rPre=0,dCod=0,rCod=0;const tr=[];
+ let wN=0,ewS=0,vwS=0,bwS=0,chgS=0,exS=0,overN=0,fwdS=0,overEst=0;
+ for(const o of rows){const s=o[ST];
+  if(s==0)d++;else if(s==1)r++;else if(s==3)canc++;else inf++;
+  if(s==0&&o[TR]>=0)tr.push(o[TR]);
+  if(o[BR]>=0){brD++;if(o[BR]==1)brN++;}
+  if(o[FR]>0){frSum+=o[FR];frN++;}
+  if(o[AT]>=2){ndD+=(s==0);ndR+=(s==1);}
+  if(o[PAY]==1){cod++;if(s==0)dCod++;else if(s==1)rCod++;}else if(o[PAY]==0){pre++;if(s==0)dPre++;else if(s==1)rPre++;}
+  gmv+=o[TT];if(s==0)realised+=o[TT];
+  if(o[BW]>0){wN++;const ew=Math.max(0,o[EW]),vw=Math.max(0,o[VW]),bw=o[BW];const chg=Math.max(ew,vw);
+    ewS+=ew;vwS+=vw;bwS+=bw;chgS+=chg;const ex=Math.max(0,bw-chg);exS+=ex;if(ex>50)overN++;
+    if(o[FWD]>0){fwdS+=o[FWD];overEst+=o[FWD]*ex/bw;}}
+ }
+ const conc=d+r;
+ return{n:rows.length,d,r,inf,canc,conc,matured:d+r+canc,dr:pct(d,conc),rto:pct(r,conc),spd:med(tr),
+  brh:pct(brN,brD),brN,brD,frSum,frN,frAvgShip:rows.length?Math.round(frSum/rows.length):null,frAvgShipped:frN?Math.round(frSum/frN):null,
+  ndrRec:pct(ndD,ndD+ndR),cod,pre,codpct:pct(cod,cod+pre),aov:d?Math.round(realised/d):null,gmv,realised,
+  drPre:pct(dPre,dPre+rPre),rtoPre:pct(rPre,dPre+rPre),nPre:dPre+rPre,drCod:pct(dCod,dCod+rCod),rtoCod:pct(rCod,dCod+rCod),nCod:dCod+rCod,
+  wN,ewKg:wN?ewS/wN/1000:null,vwKg:wN?vwS/wN/1000:null,bwKg:wN?bwS/wN/1000:null,chgKg:wN?chgS/wN/1000:null,exKg:wN?exS/wN/1000:null,overPct:pct(overN,wN),overEst:Math.round(overEst)};
+}
+function speedByDim(rows,dimIdx,dimList){const b={};dimList.forEach(z=>b[z]=[]);const arr=(dimIdx===TI?TZ:ZO);
+ for(const o of rows)if(o[ST]==0&&o[TR]>=0){const z=arr[o[dimIdx]];if(z in b)b[z].push(o[TR]);}
+ const r={};dimList.forEach(z=>r[z]={m:med(b[z]),n:b[z].length});return r;}
+function byCourier(rows){const g={};CO.forEach(c=>g[c]=[]);for(const o of rows)g[CO[o[CI]]].push(o);
+ return CO.map(c=>({c,rows:g[c]})).filter(o=>o.rows.length).sort((a,b)=>b.rows.length-a.rows.length);}
+
+let CH={};
+function initCharts(){
+ CH.outcome=new Chart(chOutcome,{type:'doughnut',data:{labels:['Delivered','RTO','In-flight','Cancelled'],datasets:[{data:[0,0,0,0],backgroundColor:[C.green,C.red,C.blue,C.grey],borderColor:C.card,borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'56%',plugins:{legend:{display:false},tooltip:Object.assign({},tip,{callbacks:{label:c=>' '+c.label+': '+c.raw}})}}});
+ CH.trend=new Chart(chTrend,{data:{labels:[],datasets:[
+   {type:'bar',label:'Orders',data:[],yAxisID:'y1',backgroundColor:'rgba(63,114,190,.30)',borderColor:C.blue,borderWidth:1.5,borderRadius:3,order:2},
+   {type:'line',label:'Delivery %',data:[],yAxisID:'y',borderColor:C.greenD,borderWidth:2.5,tension:.18,pointStyle:'rectRounded',pointRadius:5,pointBackgroundColor:[],pointBorderColor:C.line,pointBorderWidth:1.4,order:1}]},
+   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tip},scales:{x:{grid:{display:false},border:axB,ticks:{font:{size:9,weight:'700'},maxRotation:0,autoSkip:true}},y:{position:'left',min:0,max:104,grid:gridCfg,border:axB,ticks:{callback:v=>v+'%'}},y1:{position:'right',beginAtZero:true,grid:{display:false},border:axB,title:{display:true,text:'ORDERS',font:{family:GS,weight:'700',size:9}}}}}});
+}
+
+let curLo,curHi,PRODFILTER='__all__',MINORD=1,PINMIN=10,PINPROD=2;
+function tgt(){return{dr:+document.getElementById('tDR').value||85,rto:+document.getElementById('tRTO').value||15,br:+document.getElementById('tBR').value||5,sp:+document.getElementById('tSP').value||4};}
+function ragHi(v,t){return v==null?'na':(v>=t?'g':(v>=t*0.92?'a':'r'));}        // higher better
+function ragLo(v,t){return v==null?'na':(v<=t?'g':(v<=t*1.30?'a':'r'));}        // lower better
+function deltaHTML(cur,prev,higherBetter,suf,dec){
+ if(cur==null||prev==null)return '<span class="delta fl">— no prior</span>';
+ const dv=Math.round((cur-prev)*(dec?10:10))/10;const good=higherBetter?dv>0:dv<0;
+ const cls=dv===0?'fl':(good?'up':'dn');const ar=dv>0?'▲':(dv<0?'▼':'■');
+ return `<span class="delta ${cls}">${ar} ${Math.abs(dv)}${suf||''} vs prev</span>`;
+}
+function paysub(preV,codV,higherBetter){const c=v=>v==null?'na':(higherBetter?drC(v):(v<=15?'g':v<=30?'a':'r'));
+ return `<div class="paysub"><div class="ps"><div class="pl">Prepaid</div><div class="pv t-${c(preV)}">${fmt(preV,'%')}</div></div><div class="ps"><div class="pl">COD</div><div class="pv t-${c(codV)}">${fmt(codV,'%')}</div></div></div>`;}
+
+function priorWindow(lo,hi){const L=Math.round((di2d(hi)-di2d(lo))/86400000)+1;const ph=di2d(lo);ph.setDate(ph.getDate()-1);const pl=new Date(ph);pl.setDate(pl.getDate()-(L-1));return[d2di(pl),d2di(ph)];}
+
+function render(lo,hi){
+ curLo=lo;curHi=hi;const T=tgt();
+ const rows=ORD.filter(o=>o[DT]>=lo&&o[DT]<=hi);
+ const ov=metrics(rows),bc=byCourier(rows);
+ const [plo,phi]=priorWindow(lo,hi);const prev=metrics(ORD.filter(o=>o[DT]>=plo&&o[DT]<=phi));
+ document.getElementById('frange').textContent=rows.length.toLocaleString('en-IN')+' ORDERS · '+human(lo)+' → '+human(hi);
+ document.getElementById('tagrow').innerHTML=`<span class="tag solid">${human(lo)}–${human(hi)}</span><span class="tag g">Delivery ${fmt(ov.dr,'%')}</span><span class="tag r">RTO ${fmt(ov.rto,'%')}</span><span class="tag">COD ${fmt(ov.codpct,'%')}</span><span class="tag p">${bc.length} couriers</span>`;
+ // maturity banner
+ const matpct=rows.length?Math.round(1000*ov.matured/rows.length)/10:100;
+ const mcls=matpct>=90?'mg':(matpct>=70?'ma':'mr');const mp=matpct>=90?'mg2':(matpct>=70?'ma2':'mr2');
+ document.getElementById('matbar').className='matbar '+mcls;
+ document.getElementById('matbar').innerHTML=`<span class="mpill ${mp}">MATURITY ${matpct}%</span><span>${ov.matured.toLocaleString('en-IN')} of ${rows.length.toLocaleString('en-IN')} orders concluded · ${ov.inf} still in-flight</span><span class="mnote">${matpct>=90?'Window fully matured — rates are settled.':(matpct>=70?'Recent orders still moving — delivery rate will rise as they conclude.':'⚠ Low maturity — many orders still in transit; delivery rate is understated for this window. Rates shown are on concluded orders only.')}</span>`;
+ // KPI cards w/ target + RAG + delta
+ const dband=ragHi(ov.dr,T.dr), rband=ragLo(ov.rto,T.rto), bband=ragLo(ov.brh,T.br), sband=ragLo(ov.spd,T.sp);
+ const kp=[
+  {b:dband,ix:'[ A ]',l:'Delivery Rate',v:fmt(ov.dr,'%'),tg:`Target ≥${T.dr}%`,dl:deltaHTML(ov.dr,prev.dr,true,'pp'),s:`${ov.d} delivered / ${ov.conc} concluded`,pay:paysub(ov.drPre,ov.drCod,true)},
+  {b:rband,ix:'[ B ]',l:'RTO Rate',v:fmt(ov.rto,'%'),tg:`Target ≤${T.rto}%`,dl:deltaHTML(ov.rto,prev.rto,false,'pp'),s:`${ov.r} returned / ${ov.conc} concluded`,pay:paysub(ov.rtoPre,ov.rtoCod,false)},
+  {b:'ink',ix:'[ C ]',l:'Total Orders',v:ov.n.toLocaleString('en-IN'),tg:'volume',dl:deltaHTML(ov.n,prev.n,true,''),s:`${ov.matured} matured · ${ov.inf} in-flight`},
+  {b:sband,ix:'[ D ]',l:'Median Pickup→Delivery',v:ov.spd==null?'—':ov.spd+'d',tg:`Target ≤${T.sp}d`,dl:deltaHTML(ov.spd,prev.spd,false,'d'),s:'courier transit, delivered'},
+  {b:bband,ix:'[ E ]',l:'EDD Breach',v:fmt(ov.brh,'%'),tg:`Target ≤${T.br}%`,dl:deltaHTML(ov.brh,prev.brh,false,'pp'),s:`${ov.brN} late of ${ov.brD} delivered`},
+  {b:'green',ix:'[ F ]',l:'Avg Shipping Cost',v:inr(ov.frAvgShip),tg:'per order',dl:deltaHTML(ov.frAvgShip,prev.frAvgShip,false,''),s:`₹${ov.frAvgShipped} per shipped order`}];
+ const ragLabel=c=>c==='g'?'<span class="rag g">on target</span>':c==='a'?'<span class="rag a">near</span>':c==='r'?'<span class="rag r">off target</span>':'';
+ document.getElementById('kpis').innerHTML=kp.map(x=>`<div class="card"><div class="topbar bg-${x.b==='g'?'green':x.b==='a'?'amber':x.b==='r'?'red':x.b}"></div><div class="kix">${x.ix}</div><div class="klabel">${x.l}</div><div class="kval ${x.b==='g'?'kpi-green':x.b==='r'?'kpi-red':x.b==='a'?'':''}" style="${x.b==='g'?'color:var(--greenD)':x.b==='r'?'color:var(--redD)':x.b==='a'?'color:var(--amberD)':''}">${x.v}</div><div class="krow"><span class="tgt">${x.tg}</span> ${['g','a','r'].includes(x.b)?ragLabel(x.b):''} ${x.dl}</div><div class="ksub">${x.s}</div>${x.pay||''}</div>`).join('');
+ // outcome donut
+ if(CH.outcome){CH.outcome.data.datasets[0].data=[ov.d,ov.r,ov.inf,ov.canc];CH.outcome.update('none');}
+ document.getElementById('outLeg').innerHTML=[['Delivered',ov.d,C.green],['RTO',ov.r,C.red],['In-flight',ov.inf,C.blue],['Cancelled',ov.canc,C.grey]].map(x=>`<span><span class="swatch" style="background:${x[2]}"></span>${x[0]} ${x[1]}</span>`).join('');
+ // weekly trend
+ const wk={};for(const o of rows){const dd=di2d(o[DT]);const day=(dd.getDay()+6)%7;dd.setDate(dd.getDate()-day);const key=d2di(dd);(wk[key]=wk[key]||{n:0,d:0,c:0}).n++;if(o[ST]==0){wk[key].d++;wk[key].c++;}else if(o[ST]==1)wk[key].c++;}
+ const wks=Object.keys(wk).map(Number).sort((a,b)=>a-b);const rates=wks.map(w=>wk[w].c?Math.round(1000*wk[w].d/wk[w].c)/10:null);
+ if(CH.trend){CH.trend.data.labels=wks.map(w=>di2d(w).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}));CH.trend.data.datasets[0].data=wks.map(w=>wk[w].n);CH.trend.data.datasets[1].data=rates;CH.trend.data.datasets[1].pointBackgroundColor=rates.map(v=>v==null?C.grey:(v<70?C.red:C.green));CH.trend.update('none');}
+ // weight panel (headline)
+ const mx=Math.max(ov.bwKg||0,0.001);
+ document.getElementById('wpanel').innerHTML=
+  `<div class="wbar"><span class="wl">Entered (dead)</span><span class="wt"><i style="width:${100*(ov.ewKg||0)/mx}%;background:${C.grey}"></i></span><b>${(ov.ewKg||0).toFixed(2)}kg</b></div>
+   <div class="wbar"><span class="wl">Volumetric</span><span class="wt"><i style="width:${100*(ov.vwKg||0)/mx}%;background:${C.blue}"></i></span><b>${(ov.vwKg||0).toFixed(2)}kg</b></div>
+   <div class="wbar"><span class="wl">Chargeable</span><span class="wt"><i style="width:${100*(ov.chgKg||0)/mx}%;background:${C.greenD}"></i></span><b>${(ov.chgKg||0).toFixed(2)}kg</b></div>
+   <div class="wbar"><span class="wl">Billed by ITL</span><span class="wt"><i style="width:100%;background:${C.redD}"></i></span><b>${(ov.bwKg||0).toFixed(2)}kg</b></div>
+   <div class="finrow" style="margin-top:8px"><span>Shipments billed above chargeable</span><b class="t-r">${fmt(ov.overPct,'%')}</b></div>
+   <div class="finrow"><span>Avg excess weight billed</span><b>${(ov.exKg||0).toFixed(2)} kg/order</b></div>
+   <div class="finrow"><span>Est. freight recoverable<span class="est">EST</span></span><b class="t-r">${inrL(ov.overEst)}</b></div>`;
+ renderProducts(bc,rows.length,T);
+ renderPincodes(rows);
+ document.getElementById('foot').innerHTML=`<b>SOURCE.</b> ITL "All orders" export · ${M.rows.toLocaleString('en-IN')} line-rows → ${M.total.toLocaleString('en-IN')} unique orders · ${human(M.dmin)}–${human(M.dmax)} · generated ${M.generated}. &nbsp; <b>DEFS.</b> Delivery rate=Delivered÷(Delivered+RTO); median speed=pickup→delivery; EDD breach=delivered after promised date; chargeable weight=max(dead,volumetric); overbilling=billed−chargeable; est recoverable=FWD×excess÷billed; Wilson LB at z=1.64 (95% one-sided). &nbsp; <b>CAVEATS.</b> Carriers &lt;50 orders directional; ~25% of rows lack a zone tag; product cards count each order under its primary line item; weight/freight on shipped (billed) orders only. Store: SnugLlama.`;
+ document.querySelectorAll('.preset').forEach(p=>p.classList.toggle('on',(p.dataset.d==='all'&&lo===M.dmin&&hi===M.dmax)));
+}
+function pcell(label,val,cls,meterPct,meterCol){return `<div class="pc ${cls?'f-'+cls:''}"><div class="l">${label}</div><div class="v">${val}</div>${meterPct!=null?`<div class="drcellbar"><i style="width:${Math.max(0,Math.min(100,meterPct))}%;background:${meterCol}"></i></div>`:''}</div>`;}
+function prodDetail(pr){
+ const x=metrics(pr);const zAll=speedByDim(pr,ZI,ZO),tAll=speedByDim(pr,TI,TZ);
+ const zc=ZO.map(z=>{const v=zAll[z];return `<div class="zc f-${spdC(v.m)}"><div class="zk">${z==='Unzoned'?'UNZ':z}</div><div class="zv">${v.m==null?'—':v.m}</div><small>${v.n||''}</small></div>`;}).join('');
+ const tc=TZ.map(t=>{const v=tAll[t];return `<div class="zc f-${spdC(v.m)}"><div class="zk">${t}</div><div class="zv">${v.m==null?'—':v.m}</div><small>${v.n||''}</small></div>`;}).join('');
+ const pp=x.codpct==null?0:100-x.codpct;
+ return `<div class="pdetail">
+   <div class="dpanel"><h4>Prepaid vs COD</h4><div class="psplit"><div class="psbox ppd"><div class="pt">Prepaid · n=${x.nPre}</div><div class="pr"><span>Delivery</span><b class="t-${drC(x.drPre)}">${fmt(x.drPre,'%')}</b></div><div class="pr"><span>RTO</span><b>${fmt(x.rtoPre,'%')}</b></div></div><div class="psbox cod"><div class="pt">COD · n=${x.nCod}</div><div class="pr"><span>Delivery</span><b class="t-${drC(x.drCod)}">${fmt(x.drCod,'%')}</b></div><div class="pr"><span>RTO</span><b>${fmt(x.rtoCod,'%')}</b></div></div></div><div class="volbar2"><div style="width:${pp}%;background:${C.green}">${pp?'PPD '+pp.toFixed(0)+'%':''}</div><div style="width:${x.codpct||0}%;background:${C.amberD}">${x.codpct?'COD '+x.codpct.toFixed(0)+'%':''}</div></div></div>
+   <div class="dpanel"><h4>Weight &amp; freight</h4><div class="drow"><span>Entered / Volumetric</span><b>${(x.ewKg||0).toFixed(2)} / ${(x.vwKg||0).toFixed(2)}kg</b></div><div class="drow"><span>Chargeable vs billed</span><b>${(x.chgKg||0).toFixed(2)} → <span class="t-r">${(x.bwKg||0).toFixed(2)}kg</span></b></div><div class="drow"><span>Overbilled shipments</span><b class="t-r">${fmt(x.overPct,'%')}</b></div><div class="drow"><span>Avg shipping / order</span><b>${inr(x.frAvgShipped)}</b></div><div class="drow"><span>Est. recoverable<span class="est">EST</span></span><b class="t-r">${inr(x.overEst)}</b></div></div>
+   <div class="dpanel"><h4>Outcomes &amp; revenue</h4><div class="drow"><span>Delivered / RTO</span><b><span class="t-g">${x.d}</span> / <span class="t-r">${x.r}</span></b></div><div class="drow"><span>In-flight / cancelled</span><b>${x.inf} / ${x.canc}</b></div><div class="drow"><span>Realised revenue</span><b>${inr(x.realised)}</b></div><div class="drow"><span>AOV (delivered)</span><b>${inr(x.aov)}</b></div></div>
+   <div class="dpanel" style="grid-column:1/-1"><h4>Speed by zone &amp; tier — median pickup→delivery (days · n)</h4><div class="zgrid">${zc}<span style="width:14px"></span>${tc}</div></div>
+ </div>`;
+}
+function renderProducts(bc,total,T){let shown=0;
+ const html=bc.map((o,i)=>{const pg={};for(const r of o.rows){const p=PR[r[PI]];(pg[p]=pg[p]||[]).push(r);}
+   let prods=Object.entries(pg).filter(([pn,pr])=>pr.length>=MINORD);if(PRODFILTER!=='__all__')prods=prods.filter(([pn])=>pn===PRODFILTER);
+   prods.sort((a,b)=>b[1].length-a[1].length);if(!prods.length)return '';
+   const x=metrics(o.rows);const share=Math.round(1000*o.rows.length/total)/10;const band=ragHi(x.dr,T.dr);
+   const zs=speedByDim(o.rows,ZI,CARDZ);let zc='';CARDZ.forEach(z=>{const v=zs[z];zc+=`<div class="zc f-${spdC(v.m)}"><div class="zk">${z}</div><div class="zv">${v.m==null?'—':v.m}</div><small>${v.n||''}</small></div>`;});
+   const tot=x.d+x.r+x.inf+x.canc||1;
+   const ob=`<div class="obar"><i style="width:${100*x.d/tot}%;background:${C.green}"></i><i style="width:${100*x.r/tot}%;background:${C.red}"></i><i style="width:${100*x.inf/tot}%;background:${C.blue}"></i><i style="width:${100*x.canc/tot}%;background:${C.grey}"></i></div><div class="obar-leg"><span><i style="background:${C.green}"></i>Dlv ${x.d}</span><span><i style="background:${C.red}"></i>RTO ${x.r}</span><span><i style="background:${C.blue}"></i>Flight ${x.inf}</span><span><i style="background:${C.grey}"></i>Canc ${x.canc}</span></div>`;
+   const pm=`<div class="pmwrap"><div class="pmrow"><span class="pml">Prepaid DR</span><span class="pmbar"><i style="width:${x.drPre||0}%;background:${C.greenD}"></i></span><b class="t-${drC(x.drPre)}">${fmt(x.drPre,'%')}</b></div><div class="pmrow"><span class="pml">COD DR</span><span class="pmbar"><i style="width:${x.drCod||0}%;background:${C.amberD}"></i></span><b class="t-${drC(x.drCod)}">${fmt(x.drCod,'%')}</b></div></div>`;
+   const st=[['RTO',fmt(x.rto,'%'),x.rto==null?'na':(x.rto<=T.rto?'g':x.rto<=T.rto*1.3?'a':'r')],['Med p→d',x.spd==null?'—':x.spd+'d',spdC(x.spd)],['Breach',fmt(x.brh,'%'),brC(x.brh)],['Avg frt',inr(x.frAvgShipped),''],['NDR rec',fmt(x.ndrRec,'%'),ndC(x.ndrRec)]];
+   const score=`<div class="cscore"><div class="csA"><div class="chero"><div class="big t-${band}">${fmt(x.dr,'%')}</div><div class="bl">delivery<br>rate</div></div><div class="meter"><span style="width:${x.dr||0}%;background:${bandCol(band)}"></span></div>${ob}</div><div class="csB">${pm}<div class="statrow">${st.map(s=>`<div class="stat ${s[2]?'f-'+s[2]:''}"><div class="sl">${s[0]}</div><div class="sv">${s[1]}</div></div>`).join('')}</div></div><div class="csC"><div class="zstrip"><div class="zt">Median pickup→delivery by zone (days · n)</div><div class="zcells">${zc}</div></div></div></div>`;
+   const chips=`<span class="csum"><b class="t-${band}">DR ${fmt(x.dr,'%')}</b><span>RTO ${fmt(x.rto,'%')}</span><span>${x.spd==null?'—':x.spd+'d'}</span><span>Brh ${fmt(x.brh,'%')}</span><span>COD-DR ${fmt(x.drCod,'%')}</span><span>${inr(x.frAvgShipped)}/o</span></span>`;
+   const rowsH=prods.map(([pn,pr])=>{const px=metrics(pr);const zs2=speedByDim(pr,ZI,CARDZ);shown++;
+     let zm='';CARDZ.forEach(z=>{const v=zs2[z];zm+=`<i class="f-${spdC(v.m)}" title="Zone ${z}: ${v.m==null?'n/a':v.m+'d'}">${v.m==null?'·':v.m}</i>`;});
+     return `<details class="prod"><summary class="prow"><div class="pcar">▸</div><div class="pn"><div class="nm">${pn}</div><div class="sub">${px.n} ord · ${Math.round(1000*px.n/o.rows.length)/10}%</div></div>${pcell('Del. rate',fmt(px.dr,'%'),drC(px.dr),px.dr,bandCol(drC(px.dr)))}${pcell('RTO',fmt(px.rto,'%'),px.rto==null?'na':(px.rto<=20?'g':px.rto<=30?'a':'r'))}${pcell('Med p→d',px.spd==null?'—':px.spd+'d',spdC(px.spd))}${pcell('Breach',fmt(px.brh,'%'),brC(px.brh))}${pcell('Billed kg',(px.bwKg||0).toFixed(2),px.overPct>=80?'r':px.overPct>=50?'a':'')}${pcell('Avg frt',inr(px.frAvgShipped),'')}<div class="pc zg"><div class="l">Zone A→E</div><div class="zmini">${zm}</div></div></summary>${prodDetail(pr)}</details>`;}).join('');
+   return `<details class="pcourier" ${i<2?'open':''}><summary><span class="snm">${o.c}</span>${chips}<span class="sst">${o.rows.length.toLocaleString('en-IN')} ord · ${prods.length} prod</span></summary>${score}<div class="plist">${rowsH}</div></details>`;}).join('');
+ document.getElementById('prod').innerHTML=html||'<div class="note">No products match this filter / threshold in the window.</div>';
+ document.getElementById('prodcount').textContent=shown+' PRODUCT CARDS';
+}
+let PINSORT={k:'lb',dir:-1},PINARR=[];
+function pinRec(x){
+ const conf=(x.conc>=20&&x.prods>=5)?'hi':(x.conc>=10&&x.prods>=3?'md':'lo');
+ let act,why;
+ const codRTO=x.codC?100*x.codR/x.codC:null, preRTO=x.preC?100*x.preR/x.preC:null;
+ if(conf==='lo'){act='Monitor';why='thin sample — keep watching, don’t act yet';}
+ else if(x.lb<20){act='OK';why='RTO not elevated with confidence (floor '+x.lb+'%)';}
+ else if(x.codC>=5 && (x.preC<5 || (preRTO!=null && preRTO<=20))){act='COD→prepaid';why='COD RTO '+(codRTO!=null?Math.round(codRTO)+'%':'?')+(preRTO!=null?' vs prepaid '+Math.round(preRTO)+'%':'')+' — drop COD here, keep prepaid';}
+ else if(x.lb>=35){act='Block/verify';why='high RTO across payment types (floor '+x.lb+'%)';}
+ else{act='Verify addr';why='elevated RTO ('+x.lb+'% floor) — confirm address before dispatch';}
+ return{conf,act,why};
+}
+function renderPincodes(rows){
+ const g={};
+ for(const o of rows){const p=o[PIN];if(!p)continue;const e=g[p]||(g[p]={tot:0,d:0,r:0,inf:0,canc:0,cod:0,pay:0,codD:0,codR:0,preD:0,preR:0,prods:new Set(),cour:new Set()});
+   e.tot++;const s=o[ST];if(s==0)e.d++;else if(s==1)e.r++;else if(s==3)e.canc++;else e.inf++;
+   e.prods.add(o[PI]);e.cour.add(o[CI]);
+   if(o[PAY]==1){e.cod++;if(s==0)e.codD++;else if(s==1)e.codR++;}else if(o[PAY]==0){if(s==0)e.preD++;else if(s==1)e.preR++;}
+   if(o[PAY]>=0)e.pay++;}
+ let arr=Object.entries(g).map(([p,e])=>{const conc=e.d+e.r;return{pin:p,tot:e.tot,conc,d:e.d,r:e.r,inf:e.inf,
+   rate:pct(e.r,conc),lb:Math.round(1000*wilsonLB(e.r,conc,1.64))/10,prods:e.prods.size,cour:e.cour.size,
+   codpct:pct(e.cod,e.pay),codC:e.codD+e.codR,codR:e.codR,preC:e.preD+e.preR,preR:e.preR,codRTO:pct(e.codR,e.codD+e.codR)};})
+   .filter(x=>x.conc>=PINMIN && x.prods>=PINPROD);
+ arr.forEach(x=>{const r=pinRec(x);x.conf=r.conf;x.act=r.act;x.why=r.why;});
+ const k=PINSORT.k,dir=PINSORT.dir;
+ arr.sort((a,b)=>{let av=a[k],bv=b[k];if(typeof av==='string')return dir*((av||'').localeCompare(bv||''));return dir*((av==null?-1:av)-(bv==null?-1:bv));});
+ PINARR=arr;
+ const confChip=c=>`<span class="conf ${c}">${c==='hi'?'HIGH':c==='md'?'MED':'LOW'}</span>`;
+ const actCls=a=>a==='COD→prepaid'?'md':a==='Block/verify'?'hi':a==='Verify addr'?'md':a==='OK'?'ok':'lo';
+ const cols=[['pin','Pincode',1],['loc','Location',0],['tot','Total',1],['conc','Concl',1],['d','Deliv',1],['r','RTO',1],['rate','RTO%',1],['lb','Floor*',1],['codpct','COD%',1],['codRTO','COD-RTO%',1],['conf','Conf',0],['act','Action',0]];
+ const head='<tr>'+cols.map(c=>{const ar=PINSORT.k===c[0]?(dir<0?' ▼':' ▲'):'';return c[2]?`<th class="psort${c[0]==='pin'?' l':''}" data-k="${c[0]}">${c[1]}${ar}</th>`:`<th${c[0]==='loc'?' class="l"':''}>${c[1]}</th>`;}).join('')+'</tr>';
+ const top=arr.slice(0,60);
+ const body=top.map(x=>`<tr><td class="l"><b>${x.pin}</b></td><td class="l">${PM[x.pin]||'—'}</td><td>${x.tot}</td><td>${x.conc}</td><td class="t-g">${x.d}</td><td class="t-r">${x.r}</td><td class="t-r"><b>${fmt(x.rate,'%')}</b></td><td>${x.lb}%</td><td>${fmt(x.codpct,'%')}</td><td class="t-r">${fmt(x.codRTO,'%')}</td><td style="text-align:center">${confChip(x.conf)}</td><td style="text-align:center"><span class="conf ${actCls(x.act)}" title="${x.why}">${x.act}</span></td></tr>`).join('');
+ const nAct=arr.filter(x=>['COD→prepaid','Block/verify','Verify addr'].includes(x.act)).length;
+ document.getElementById('pintable').innerHTML=arr.length?
+  `<table><thead>${head}</thead><tbody>${body}</tbody></table><div class="note" style="margin-top:12px"><b>Reading a row before you blacklist:</b> rank by <b>Floor*</b> (Wilson 95% lower bound — the RTO is at least this given the sample). Then sanity-check: <b>Total/Deliv</b> = the volume &amp; good orders you'd sacrifice by hard-blocking; <b>COD-RTO%</b> vs prepaid tells you it's a COD problem (it almost always is — national prepaid RTO is ~2%). <b>Action</b>: <b>COD→prepaid</b> = make this pincode prepaid-only (keeps the delivered orders, kills the COD bleed); <b>Verify addr</b> / <b>Block</b> = stronger steps when even prepaid struggles; <b>Monitor/OK</b> = don't act. ${nAct} of ${arr.length} pincodes are actionable. Showing top ${top.length}. Hover an Action for its reason.</div>`
+  :'<div class="note">No pincodes meet the order/product thresholds in this window — lower the filters.</div>';
+ document.getElementById('pincount').textContent=arr.length+' PINCODES · '+nAct+' ACTIONABLE';
+}
+
+const fEl=document.getElementById('from'),tEl=document.getElementById('to');
+fEl.value=di2iso(M.dmin);tEl.value=di2iso(M.dmax);[fEl,tEl].forEach(e=>{e.min=di2iso(M.dmin);e.max=di2iso(M.dmax);});
+document.getElementById('sub').textContent=`ITL EXPORT · ${human(M.dmin)} → ${human(M.dmax)} · ${M.total.toLocaleString('en-IN')} ORDERS · ${M.store}`;
+const psel=document.getElementById('prodfilter');
+psel.innerHTML='<option value="__all__">All products</option>'+PR.slice().sort().map(p=>`<option value="${p.replace(/"/g,'&quot;')}">${p}</option>`).join('');
+psel.addEventListener('change',()=>{PRODFILTER=psel.value;render(curLo,curHi);});
+document.getElementById('minord').addEventListener('change',e=>{MINORD=+e.target.value;render(curLo,curHi);});
+document.getElementById('pinmin').addEventListener('change',e=>{PINMIN=+e.target.value;render(curLo,curHi);});
+document.getElementById('pinprod').addEventListener('change',e=>{PINPROD=+e.target.value;render(curLo,curHi);});
+document.getElementById('pintable').addEventListener('click',e=>{const th=e.target.closest('.psort');if(!th)return;const k=th.dataset.k;if(PINSORT.k===k)PINSORT.dir*=-1;else PINSORT={k,dir:-1};render(curLo,curHi);});
+function dl(name,text,type){const b=new Blob([text],{type:type||'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();a.remove();}
+document.getElementById('dlPins').addEventListener('click',()=>{const act=PINARR.filter(x=>['COD→prepaid','Block/verify','Verify addr'].includes(x.act));dl('pincode-action-list.txt',act.map(x=>x.pin).join(', '));});
+document.getElementById('dlCsv').addEventListener('click',()=>{const h=['pincode','location','total','concluded','delivered','rto','rto_pct','floor_pct','cod_pct','cod_rto_pct','confidence','action','reason'];const rs=PINARR.map(x=>[x.pin,'"'+(PM[x.pin]||'').replace(/"/g,'')+'"',x.tot,x.conc,x.d,x.r,x.rate,x.lb,x.codpct,x.codRTO,x.conf,x.act,'"'+x.why+'"'].join(','));dl('pincode-blacklist.csv',[h.join(',')].concat(rs).join('\n'),'text/csv');});
+['tDR','tRTO','tBR','tSP'].forEach(id=>document.getElementById(id).addEventListener('change',()=>render(curLo,curHi)));
+function apply(){let lo=iso2di(fEl.value||di2iso(M.dmin)),hi=iso2di(tEl.value||di2iso(M.dmax));if(lo>hi)[lo,hi]=[hi,lo];render(lo,hi);}
+fEl.addEventListener('change',apply);tEl.addEventListener('change',apply);
+document.querySelectorAll('.preset').forEach(p=>p.addEventListener('click',()=>{let lo,hi=M.dmax;if(p.dataset.d==='all'){lo=M.dmin;hi=M.dmax;}else{const dd=di2d(M.dmax);dd.setDate(dd.getDate()-(+p.dataset.d)+1);lo=d2di(dd);}fEl.value=di2iso(lo);tEl.value=di2iso(hi);render(lo,hi);}));
+render(M.dmin,M.dmax);
+if(HASCHART){try{initCharts();render(curLo,curHi);}catch(e){console.warn('chart init failed; data still rendered',e);}}
+
+})();
+</script>
+
+</body></html>
