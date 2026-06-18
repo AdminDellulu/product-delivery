@@ -51,16 +51,13 @@
   #miniBanner .mt{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:-.4px;color:var(--paper)}
   #miniBanner .ml{display:flex;gap:6px;align-items:center}
   #miniBanner .ml img{height:16px;width:auto;background:var(--paper);border-radius:3px;padding:2px 4px}
-.appnav{position:sticky;top:0;z-index:80;background:var(--ink);color:var(--paper);border-bottom:2px solid var(--line)}
-.appnav-in{max-width:1180px;margin:0 auto;padding:9px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.appnav .mark{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--amber)}
-.appnav nav{display:flex;gap:6px;flex-wrap:wrap}
-.appnav nav a{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:#cfcabb;text-decoration:none;padding:6px 11px;border:1.5px solid transparent;border-radius:5px}
-.appnav nav a:hover{background:rgba(244,239,226,.12)}
-.appnav nav a.active{background:var(--amber);color:var(--ink);border-color:var(--amber)}
+.appnav-in{max-width:1180px;margin:0 auto;padding:0 20px 16px;display:flex;gap:8px;flex-wrap:wrap}
+.appnav nav{display:flex;gap:8px;flex-wrap:wrap}
+.appnav nav a{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#6b685f;text-decoration:none;padding:8px 16px;border:2px solid var(--line);border-radius:var(--radius);background:var(--card);box-shadow:3px 3px 0 var(--shadow)}
+.appnav nav a:hover{background:#efe6cf}
+.appnav nav a.active{background:var(--ink);color:var(--paper)}
 </style></head><body>
 <div class="appnav"><div class="appnav-in">
-  <span class="mark">Dellulu Ops · Logistics</span>
   <nav>
     <a href="index.html" class="active">Product Delivery</a>
     <a href="courier.html" id="navCourier">Courier Performance</a>
