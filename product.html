@@ -341,9 +341,10 @@ function populate(R){
   H('freshBanner','<b>Data as of '+fmtDate(m.max_snapshot_date)+'</b> &nbsp;·&nbsp; Windows vs '+fmtDate(m.ref_date)+' &nbsp;·&nbsp; Maturity '+w.all.maturity+'% ('+h.concluded+'/'+h.total_orders+' concluded). '+(matBad?'&nbsp; ⚠ '+h.non_concluded+' orders not yet concluded — delivery &amp; RTO rates are <u>PROVISIONAL</u> and will move down as the tail matures.':'&nbsp; Fully matured — rates are settled.'));
   document.getElementById('freshBanner').style.background = matBad ? 'var(--redD)' : 'var(--greenD)';
   // header
-  H('prodTitle',(pname.split('|')[0].trim()||'Product').toUpperCase()+' //<br>Delivery Performance');
-  document.title=(pname.split('|')[0].trim()||'Product')+' — Delivery Performance';
-  T('hdrsub',(m.brand_selected||'All brands')+' · '+pname+' · Orders '+fmtDate(m.first_order)+' – '+fmtDate(m.last_order)+' · n = '+m.n_orders+' orders');
+  var disp=((pname||'').replace(/\?/g,' ').split('+')[0].split('|')[0].trim())||m.product;
+  H('prodTitle',disp.toUpperCase()+' //<br>Delivery Performance');
+  document.title=disp+' — Delivery Performance';
+  T('hdrsub',(m.brand_selected||'All brands')+' · '+disp+' · Orders '+fmtDate(m.first_order)+' – '+fmtDate(m.last_order)+' · n = '+m.n_orders+' orders');
   renderBrandBar(m);
   T('tgRealised','Realised '+Lk(f.realised)+' / '+Lk(f.gmv));
   T('tgDel','Delivery '+h.delivery_rate+'%'); T('tgRto','RTO '+h.rto_rate+'%');
