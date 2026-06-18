@@ -331,7 +331,10 @@ async function load(){
 }
 
 function populate(R){
-  const m=R.meta,h=R.headline,f=R.financials,sp=R.speed,n=R.ndr,ti=R.tiers,w=R.windows;
+  const m=R.meta,h=R.headline,f=R.financials,sp=R.speed,n=R.ndr,ti=R.tiers;
+  // guard: a window key is absent when the product has no orders in that span
+  const _zw={prepaid:0,cod:0,total:0,delivered:0,concluded:0,inflight:0,rate:0,codpct:0,maturity:0};
+  const _W=R.windows||{}; const w={d15:_W.d15||_zw,d30:_W.d30||_zw,all:_W.all||_zw};
   const pname=(m.product_name||'').replace('?',' '); // raw name has a ? glyph
   // freshness / maturity banner (FIX #2)
   const matBad = w.all.maturity < 90;
@@ -399,8 +402,10 @@ function populate(R){
   const rsum=(D.reasons||[]).reduce((a,r)=>a+r[1],0); if(totRto-rsum>0) D.reasons.push(['Uncategorised',totRto-rsum]);
   // 10 geo
   let topCity=(D.topCities&&D.topCities[0])?D.topCities[0]:['—',0];
-  H('tierBig','<span class="accent">Tier 1 heavy</span> — '+ti.t1_pct+'% metros');
-  H('tierSub',ti.t1+' of '+h.total_orders+' orders go to metros + NCR; with Tier 2 it\'s <b style="color:#fff">'+ti.t1t2_pct+'%</b>. Most orders: <b style="color:#fff">'+topCity[0]+' — '+topCity[1]+'</b>.');
+  const _tiers=[['1',ti.t1_pct,'metros + NCR'],['2',ti.t2_pct,'tier-2 cities'],['3',ti.t3_pct,'tier-3 & beyond']].sort((a,b)=>b[1]-a[1]);
+  const _dom=_tiers[0];
+  H('tierBig','<span class="accent">Tier '+_dom[0]+' heavy</span> — '+_dom[1]+'% '+_dom[2]);
+  H('tierSub',ti.t1+' of '+h.total_orders+' orders go to metros + NCR ('+ti.t1_pct+'%); with Tier 2 it\'s <b style="color:#fff">'+ti.t1t2_pct+'%</b>, leaving <b style="color:#fff">'+ti.t3_pct+'%</b> in Tier 3. Most orders: <b style="color:#fff">'+topCity[0]+' — '+topCity[1]+'</b>.');
   H('tierDr','T1 '+ti.t1_dr+'% &nbsp; <span style="color:var(--green)">T2 '+ti.t2_dr+'%</span> &nbsp; <span style="color:var(--amber)">T3 '+ti.t3_dr+'%</span>');
   H('tierBar','<div style="width:'+ti.t1_pct+'%;background:var(--green)">Tier 1 · '+ti.t1_pct+'%</div><div style="width:'+ti.t2_pct+'%;background:var(--amberD)">T2 · '+ti.t2_pct+'%</div><div style="width:'+ti.t3_pct+'%;background:var(--red)">T3 · '+ti.t3_pct+'%</div>');
   // 11 stuck
