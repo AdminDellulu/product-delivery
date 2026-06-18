@@ -7,12 +7,12 @@
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
 <style>
   :root{
-    --ink:#2B2B28; --line:#3C3B36; --paper:#F0ECE2; --card:#FCFBF7;
-    --shadow:rgba(43,43,40,.18);
-    --green:#2F9D62; --greenD:#21794B;
-    --red:#D24A3C; --redD:#A6362A; --redDD:#7A2018;
-    --amber:#E0A93A; --amberD:#B98424;
-    --blue:#3F72BE; --grey:#A7A296;
+    --ink:#1C1B19; --line:#2E2D27; --paper:#F4EFE2; --card:#FBF8EE;
+    --shadow:rgba(28,27,25,.18);
+    --green:#2C6E5D; --greenD:#1E5446;
+    --red:#E1502A; --redD:#B83C18; --redDD:#8A2C10;
+    --amber:#EBB12E; --amberD:#C8901C;
+    --blue:#6B5DA6; --grey:#A39C8C;
     --radius:6px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -61,7 +61,7 @@
   .meter{height:9px;background:#e7e2d6;border:1.5px solid var(--line);border-radius:3px;margin-top:12px;overflow:hidden}
   .meter > span{display:block;height:100%}
   /* ---- note block (soft) ---- */
-  .note{background:#F8F1DE;border:2px solid var(--amberD);border-left:7px solid var(--amberD);
+  .note{background:#FBF1D6;border:2px solid var(--amberD);border-left:7px solid var(--amberD);
     border-radius:var(--radius);box-shadow:4px 4px 0 var(--shadow);padding:16px 20px;margin-top:18px}
   .note h3{color:var(--amberD);font-size:13.5px;letter-spacing:.4px;margin-bottom:7px;text-transform:uppercase}
   .note p{font-size:12.5px;color:#4a4740;margin-top:6px}
@@ -86,7 +86,7 @@
   th,td{border:1.5px solid var(--line);padding:7px 9px;text-align:right;font-variant-numeric:tabular-nums}
   th{background:var(--ink);color:var(--paper);text-transform:uppercase;font-size:10px;letter-spacing:.4px;font-family:'Space Grotesk',sans-serif;font-weight:600}
   td:first-child,th:first-child{text-align:left}
-  tr.lowmat td{background:#f6eccf}
+  tr.lowmat td{background:#f7eccc}
   .chip{font-size:9.5px;padding:1px 6px;border:1.5px solid var(--line);text-transform:uppercase;font-weight:700;border-radius:3px}
   .chip.ok{background:var(--green);color:#fff;border-color:var(--greenD)}
   .chip.warn{background:var(--amber)}
@@ -101,7 +101,7 @@
   .conf .cpct{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;margin-left:auto}
   /* alert tag + stuck section */
   .tag.alert{background:var(--red);color:#fff;border-color:var(--red);font-weight:700}
-  .alertcard{background:#FBEAE6;border:2px solid var(--redD);border-left:7px solid var(--redD);border-radius:var(--radius);box-shadow:4px 4px 0 var(--shadow);padding:18px 20px}
+  .alertcard{background:#FBE7DE;border:2px solid var(--redD);border-left:7px solid var(--redD);border-radius:var(--radius);box-shadow:4px 4px 0 var(--shadow);padding:18px 20px}
   .alertcard h3{color:var(--redD);text-transform:uppercase;font-size:13px;margin-bottom:4px;letter-spacing:.4px}
   .alertcard .big{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(28px,4.4vw,42px);color:var(--redD);line-height:1.02}
   .alertcard p{font-size:12px;color:#5a3a36;margin-top:8px}
@@ -120,8 +120,8 @@
   .kpi-money .kval{color:var(--greenD)}
   .funnel{display:flex;gap:12px;flex-wrap:wrap;align-items:stretch;margin-top:4px}
   .funnel .fbox{flex:1;min-width:110px;background:#f4f1e8;border:2px solid var(--line);border-radius:6px;padding:14px 15px}
-  .funnel .fbox.in{border-color:var(--greenD);background:#eaf3ec}
-  .funnel .fbox.out{border-color:var(--redD);background:#fbeae6}
+  .funnel .fbox.in{border-color:var(--greenD);background:#e6f0ea}
+  .funnel .fbox.out{border-color:var(--redD);background:#fbe7de}
   .funnel .fbox .fb-n{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:30px;line-height:1}
   .funnel .fbox .fb-l{font-size:10.5px;color:#5a574f;margin-top:5px;text-transform:uppercase;letter-spacing:.3px;font-weight:700;font-family:'Space Grotesk',sans-serif}
   .finrow{display:flex;justify-content:space-between;gap:10px;padding:8px 2px;border-bottom:1.5px dashed #ddd7c8;font-size:12.5px}
@@ -286,7 +286,7 @@ const skuParam = QS.get('sku');
 const PRODUCT = (QS.get('product') || (skuParam? skuParam.replace(/^(DEL|FLQ|SL|DELLULU|FLANQ|SNUGLLAMA)-/i,'').replace(/-[0-9]+$/,'') : 'TORQUE')).toUpperCase();
 const BRAND = QS.get('brand') || null; // null = all brands
 
-const C={ink:'#2B2B28',line:'#3C3B36',paper:'#F0ECE2',green:'#2F9D62',greenD:'#21794B',red:'#D24A3C',redD:'#A6362A',redDD:'#7A2018',amber:'#E0A93A',amberD:'#B98424',blue:'#3F72BE',grey:'#A7A296'};
+const C={ink:'#1C1B19',line:'#2E2D27',paper:'#F4EFE2',green:'#2C6E5D',greenD:'#1E5446',red:'#E1502A',redD:'#B83C18',redDD:'#8A2C10',amber:'#EBB12E',amberD:'#C8901C',blue:'#6B5DA6',grey:'#A39C8C'};
 const GS="'Space Grotesk'";
 let D={};
 
@@ -443,7 +443,7 @@ function renderCharts(){
 Chart.defaults.font.family="'Space Mono', monospace"; Chart.defaults.font.size=11; Chart.defaults.color=C.ink;
 const valueTags={id:'valueTags',afterDatasetsDraw(chart,a,opts){const ctx=chart.ctx;(opts.specs||[]).forEach(spec=>{const meta=chart.getDatasetMeta(spec.i);if(!meta||meta.hidden)return;const ds=chart.data.datasets[spec.i];meta.data.forEach((el,idx)=>{const v=ds.data[idx];if(v==null)return;const txt=spec.fmt?spec.fmt(v):String(v);ctx.save();ctx.font="700 11px 'Space Mono', monospace";const padX=4,w=ctx.measureText(txt).width+padX*2,h=15,r=3;let x=el.x-w/2,y;if(spec.pos==='end'){x=el.x+8;y=el.y-h/2;}else if(spec.pos==='below'){y=el.y+7;}else{y=el.y-h-7;}ctx.fillStyle=spec.bg||C.ink;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,w,h,r);else ctx.rect(x,y,w,h);ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=C.line;ctx.stroke();ctx.fillStyle=spec.fg||'#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(txt,x+w/2,y+h/2+.5);ctx.restore();});});}};
 Chart.register(valueTags);
-const gridCfg={color:'rgba(43,43,40,.08)',lineWidth:1}; const axBorder={display:true,color:C.line,width:1.5};
+const gridCfg={color:'rgba(28,27,25,.08)',lineWidth:1}; const axBorder={display:true,color:C.line,width:1.5};
 const tip={backgroundColor:C.ink,borderColor:C.amber,borderWidth:1.5,cornerRadius:4,padding:10};
 const drBand=dr=>dr>=90?C.green:(dr>=80?C.amber:C.red);
 
