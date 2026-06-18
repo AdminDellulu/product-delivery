@@ -141,9 +141,12 @@
   #topbar .blabel{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--grey)}
   .bpill{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;padding:5px 11px;border:2px solid var(--line);border-radius:20px;background:var(--card);cursor:pointer;box-shadow:2px 2px 0 var(--shadow);text-decoration:none;color:var(--ink)}
   .bpill.on{background:var(--ink);color:var(--paper)}
+  .bpill.off{opacity:.38;cursor:not-allowed;pointer-events:none;box-shadow:none;color:var(--grey);background:var(--card)}
   #stickyhead{position:sticky;top:56px;z-index:55;background:var(--ink);color:var(--paper);border:2px solid var(--line);border-radius:var(--radius);box-shadow:4px 4px 0 var(--shadow);padding:11px 16px;margin-bottom:14px;display:none;gap:14px;align-items:center;flex-wrap:wrap}
   #stickyhead.show{display:flex}
-  #stickyhead .shname{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:-.2px;text-transform:uppercase;color:var(--paper);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44%}
+  #stickyhead .shleft{display:flex;flex-direction:column;gap:1px;min-width:0;max-width:50%}
+  #stickyhead .shname{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:-.2px;text-transform:uppercase;color:var(--paper);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  #stickyhead .shmeta{font-family:'Space Mono',ui-monospace,monospace;font-weight:400;font-size:10.5px;letter-spacing:.2px;color:#cfcabb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .chiprow{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
   #stickyhead .chiprow{margin-left:auto}
   a.mchip{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;letter-spacing:.2px;padding:6px 10px;border:1.5px solid var(--line);border-radius:4px;text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;white-space:nowrap;transition:transform .06s}
@@ -164,7 +167,7 @@
     <div class="brandbar" id="brandbar"><span class="blabel">Brand</span></div>
   </div>
 
-  <div id="stickyhead"><span class="shname" id="shName">—</span><div class="chiprow" id="shChips"></div></div>
+  <div id="stickyhead"><div class="shleft"><span class="shname" id="shName">—</span><span class="shmeta" id="shMeta"></span></div><div class="chiprow" id="shChips"></div></div>
 
   <div id="freshBanner" style="border:2px solid var(--line);border-radius:var(--radius);box-shadow:4px 4px 0 var(--shadow);padding:13px 18px;margin-bottom:18px;color:#fff;font-size:12.5px;font-family:'Space Grotesk',sans-serif;font-weight:600">—</div>
 
@@ -203,7 +206,7 @@
       <div class="finrow"><span>Avg forward (FWD) charge</span><b id="shFwd">—</b></div>
       <div class="finrow"><span>Total freight spend (accrued)</span><b id="shTotal">—</b></div>
       <div class="finrow"><span>Freight as % of realised revenue</span><b id="shPct">—</b></div>
-      <div class="finrow"><span>Avg cost per RTO — round trip <span class="est">EST</span></span><b id="shRt">—</b></div>
+      <div class="finrow"><span>Avg cost per RTO — forward leg (returns free) <span class="est">EST</span></span><b id="shRt">—</b></div>
       <div class="finrow"><span id="shBurnL">Freight burned on RTOs <span class="est">EST</span></span><b style="color:var(--redD)" id="shBurn">—</b></div>
       <div class="finrow"><span>Product discounts given</span><b id="shDisc">—</b></div></div></div>
   </div>
@@ -283,7 +286,7 @@
     <div class="splitbar" id="tierBar" style="margin-top:16px;border-color:var(--paper)"></div>
   </div>
   <div class="grid g2" style="margin-top:18px">
-    <div class="chartcard"><h3>Order Density × Delivery Rate</h3><div class="cdesc">Bubble size = orders · colour = delivery rate. <span style="color:var(--green);font-weight:700">Green ≥90%</span> · <span style="color:var(--amberD);font-weight:700">amber 80–90%</span> · <span style="color:var(--redD);font-weight:700">red &lt;80%</span>.</div><div class="geomap" id="geoMap"></div></div>
+    <div class="chartcard"><h3>Order Density × Delivery Rate</h3><div class="cdesc">Bubble size = all orders (density) · colour = delivery rate of <i>concluded</i> orders. <span style="color:var(--green);font-weight:700">Green ≥80%</span> · <span style="color:var(--amberD);font-weight:700">amber 70–80%</span> · <span style="color:var(--redD);font-weight:700">red &lt;70%</span> · <span style="color:var(--grey);font-weight:700">grey = none concluded yet</span>.</div><div class="geomap" id="geoMap"></div></div>
     <div class="chartcard"><h3>Top Cities by Orders</h3><div class="cdesc">Top cities (normalised). Bars coloured by delivery rate.</div><div class="canee" style="height:430px"><canvas id="cityChart"></canvas></div></div>
   </div>
 
@@ -339,14 +342,15 @@ function setupSticky(){
 }
 function renderBrandBar(m){
   const bar=document.getElementById('brandbar'); if(!bar)return;
-  const brands=['All',...(m.brands||[])]; const sel=m.brand_selected||'All';
+  const ALL=['Dellulu','Flanq','SnugLlama'];
+  const avail=new Set(m.brands||[]); const sel=m.brand_selected||'All';
   const base='product.html?product='+encodeURIComponent(m.product||PRODUCT);
-  bar.querySelectorAll('a').forEach(a=>a.remove());
-  if(brands.length<=2){bar.style.display='none';return;}
+  bar.querySelectorAll('a,span.bpill').forEach(el=>el.remove());
   bar.style.display='flex';
-  brands.forEach(b=>{const on=(b===sel);const href=b==='All'?base:base+'&brand='+encodeURIComponent(b);
-    const a=document.createElement('a');a.href=href;a.textContent=b;a.className='bpill'+(on?' on':'');
-    bar.appendChild(a);});
+  ['All',...ALL].forEach(b=>{const on=(b===sel); const has=(b==='All')||avail.has(b);
+    if(has){const a=document.createElement('a');a.href=b==='All'?base:base+'&brand='+encodeURIComponent(b);a.textContent=b;a.className='bpill'+(on?' on':'');bar.appendChild(a);}
+    else{const s=document.createElement('span');s.textContent=b;s.className='bpill off';s.title=b+' — not sold under this brand';bar.appendChild(s);}
+  });
 }
 async function load(){
   try{
@@ -384,7 +388,7 @@ function populate(R){
   document.title=disp+' — Delivery Performance';
   T('hdrsub',(m.brand_selected||'All brands')+' · '+disp+' · Orders '+fmtDate(m.first_order)+' – '+fmtDate(m.last_order)+' · n = '+m.n_orders+' orders');
   renderBrandBar(m);
-  var ch=chipHTML(R); H('mhChips',ch); H('shChips',ch); T('shName',disp);
+  var ch=chipHTML(R); H('mhChips',ch); H('shChips',ch); T('shName',disp); T('shMeta',Number(h.total_orders).toLocaleString('en-IN')+' orders');
   // 01
   T('kA',h.delivery_rate+'%'); T('kAsub',h.delivery_rate? (R.concluded.counts[0]+' delivered / '+h.concluded+' concluded'):'—');
   T('kB',h.rto_rate+'%'); T('kBsub',(h.concluded-R.concluded.counts[0])+' returned / '+h.concluded+' concluded');
@@ -407,7 +411,7 @@ function populate(R){
   T('shPct',f.freight_pct_realised+'%'); T('shRt','~₹'+f.rto_roundtrip_est);
   H('shBurnL','Freight burned on '+(h.rto_rate?(h.concluded-R.concluded.counts[0]):0)+' RTOs <span class="est">EST</span>');
   T('shBurn','~'+inr(f.freight_burned_rto)); T('shDisc',inr(f.discounts));
-  H('noteFreight','Shipping is ~<b>₹'+f.avg_ship_per_order+'/order</b> (billed orders; rest accrued). RTO/COD reverse charges are largely unbilled, so RTO round-trip is <b>estimated at 2× the forward leg</b> (≈ ₹'+f.rto_roundtrip_est+'). With COD at <b>'+h.cod_pct+'%</b> and RTO at <b>'+h.rto_rate+'%</b>, returns are the dominant cost risk on this SKU.');
+  H('noteFreight','Shipping is ~<b>₹'+f.avg_ship_per_order+'/order</b> (mostly accrued/unbilled). Post-negotiation, ITL charges <b>no RTO/return freight</b> — only the forward flat rate by weight class. So each RTO burns just the forward leg (≈ ₹'+f.avg_fwd+'), not a round trip. With COD at <b>'+h.cod_pct+'%</b> and RTO at <b>'+h.rto_rate+'%</b>, every return still wastes that forward freight plus the product.');
   // 03 payment windows
   fillPay('p15',w.d15); fillPay('p30',w.d30); fillPay('pA',w.all);
   T('noteCod','At <b>'+h.cod_pct+'% COD</b>, this product leans heavily on cash-on-delivery — the engine of the '+h.rto_rate+'% RTO rate. Pushing part of this to prepaid is the highest-leverage fix.');
@@ -456,7 +460,7 @@ function fillDR(p,w,lab,col){
   T(p+'sub',w.delivered+' / '+w.concluded+' concluded · '+w.inflight+' in-flight');
   document.getElementById(p+'meter').style.width=w.rate+'%'; document.getElementById(p+'meter').style.background=col;
   const chip=document.getElementById(p+'chip'),pct=document.getElementById(p+'pct');
-  let cl,txt; if(w.total>=100){cl='ok';txt='Settled';}else if(w.total>0){cl='warn';txt='Firming';}else{cl='bad';txt='Provisional';}
+  let cl,txt; if(w.total<=0){cl='bad';txt='—';}else if(w.maturity>=90){cl='ok';txt='Settled';}else if(w.maturity>=40){cl='warn';txt='Warming up';}else{cl='bad';txt='Provisional';}
   chip.className='cchip '+cl; chip.textContent=txt;
   pct.textContent=w.maturity+'%'; pct.style.color=cl==='ok'?C.greenD:(cl==='warn'?C.amberD:C.redD);
 }
@@ -469,9 +473,9 @@ function renderStuck(){
   const tot=D.stuck.reduce((a,s)=>a+Number(s[7]),0);
   let rows='';
   D.stuck.forEach(s=>{const pc=s[6]==='COD'?'var(--amberD)':'var(--greenD)';
-    rows+='<tr><td><b>'+s[0]+'</b></td><td>'+(s[1]||'—')+'</td><td><span class="age-pill">'+s[2]+'d</span></td><td>'+(s[4]||'—')+'</td><td style="color:'+pc+';font-weight:700">'+s[6]+'</td><td>'+inr(s[7])+'</td></tr>';});
+    rows+='<tr><td><b>'+s[0]+'</b></td><td>'+(s[1]||'—')+'</td><td>'+fmtDate(s[8])+'</td><td>'+fmtDate(s[9])+'</td><td><span class="age-pill">'+s[2]+'d</span></td><td>'+(s[4]||'—')+'</td><td style="color:'+pc+';font-weight:700">'+s[6]+'</td><td>'+inr(s[7])+'</td></tr>';});
   wrap.innerHTML='<div class="alertcard" style="margin-bottom:16px"><h3>'+D.stuck.length+' orders stuck at pickup</h3><div class="big">₹'+Math.round(tot).toLocaleString('en-IN')+'</div><p>Value sitting in orders aged <b>4+ days</b> still at Manifested / Picked Up / Not Picked — not yet in transit. Chase the carrier for pickup.</p></div>'+
-    '<div class="scroll"><table><thead><tr><th>Order</th><th>City</th><th>Age</th><th>Status</th><th>Pay</th><th>Value</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+    '<div class="scroll"><table><thead><tr><th>Order</th><th>City</th><th>Order Date</th><th>Manifested</th><th>Age</th><th>Status</th><th>Pay</th><th>Value</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
 
 /* ===== CHARTS (identical logic to original, driven by D) ===== */
@@ -481,7 +485,7 @@ const valueTags={id:'valueTags',afterDatasetsDraw(chart,a,opts){const ctx=chart.
 Chart.register(valueTags);
 const gridCfg={color:'rgba(28,27,25,.08)',lineWidth:1}; const axBorder={display:true,color:C.line,width:1.5};
 const tip={backgroundColor:C.ink,borderColor:C.amber,borderWidth:1.5,cornerRadius:4,padding:10};
-const drBand=dr=>dr>=90?C.green:(dr>=80?C.amber:C.red);
+const drBand=dr=>dr==null?C.grey:(dr>=80?C.green:(dr>=70?C.amber:C.red));
 
 new Chart(document.getElementById('revenueChart'),{type:'doughnut',data:{labels:D.revenue.labels,datasets:[{data:D.revenue.values,backgroundColor:[C.green,C.blue,C.red,C.grey],borderColor:C.card,borderWidth:3}]},
   options:{responsive:true,maintainAspectRatio:false,cutout:'54%',plugins:{legend:{display:false},tooltip:Object.assign({},tip,{callbacks:{label:c=>' '+c.label+': ₹'+(c.raw/100000).toFixed(2)+'L ('+(c.raw/D.revenue.gmv*100).toFixed(1)+'%)'}})}}});
@@ -524,7 +528,7 @@ new Chart(document.getElementById('reasonChart'),{type:'bar',data:{labels:D.reas
 (function(){var el=document.getElementById('geoMap');if(typeof Plotly==='undefined'){el.innerHTML='<div style="padding:18px;font-size:12px;color:#6b685f">Map needs an internet connection (Plotly) to render — other sections work offline.</div>';return;}
   var g=D.geo;if(!g||!g.length){el.innerHTML='<div style="padding:18px;font-size:12px;color:#6b685f">No geo-located cities yet.</div>';return;}
   var maxN=Math.max.apply(null,g.map(x=>x[1]));
-  var trace={type:'scattergeo',mode:'markers',lon:g.map(x=>x[4]),lat:g.map(x=>x[3]),text:g.map(x=>'<b>'+x[0]+'</b><br>'+x[1]+' orders<br>DR '+x[2]+'%'),hoverinfo:'text',marker:{size:g.map(x=>x[1]),sizemode:'area',sizeref:2*maxN/(46*46),sizemin:5,color:g.map(x=>drBand(x[2])),line:{color:C.line,width:1.3},opacity:.92}};
+  var trace={type:'scattergeo',mode:'markers',lon:g.map(x=>x[4]),lat:g.map(x=>x[3]),text:g.map(x=>'<b>'+x[0]+'</b><br>'+x[1]+' orders<br>'+(x[2]==null?'no outcome yet':'DR '+x[2]+'%')),hoverinfo:'text',marker:{size:g.map(x=>x[1]),sizemode:'area',sizeref:2*maxN/(46*46),sizemin:5,color:g.map(x=>drBand(x[2])),line:{color:C.line,width:1.3},opacity:.92}};
   var layout={margin:{l:0,r:0,t:0,b:0},geo:{scope:'asia',resolution:50,lonaxis:{range:[67,98]},lataxis:{range:[6,37.5]},showland:true,landcolor:'#F4F0E6',showcountries:true,countrycolor:C.line,countrywidth:1.1,showcoastlines:true,coastlinecolor:C.line,coastlinewidth:1,showsubunits:false,showframe:false,bgcolor:'rgba(0,0,0,0)',showocean:false,showlakes:false},paper_bgcolor:'rgba(0,0,0,0)',dragmode:false};
   Plotly.newPlot('geoMap',[trace],layout,{displayModeBar:false,responsive:true});})();
 
