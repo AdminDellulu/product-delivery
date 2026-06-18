@@ -45,6 +45,12 @@
   #loadmsg{padding:40px 0;text-align:center;font-size:13px;font-family:'Space Grotesk',sans-serif;color:#6b685f}
   #countline{font-size:11px;margin-bottom:12px;letter-spacing:.4px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;color:#6b685f}
   footer{margin-top:40px;border-top:2px dashed var(--grey);padding-top:14px;font-size:10.5px;color:#6b685f;letter-spacing:.3px;text-transform:uppercase}
+  #homesticky{position:sticky;top:0;z-index:60;background:var(--paper);padding-top:8px}
+  #miniBanner{display:none;align-items:center;justify-content:space-between;gap:12px;background:var(--ink);color:var(--paper);border:2px solid var(--line);border-radius:var(--radius);box-shadow:4px 4px 0 var(--shadow);padding:9px 18px;margin-bottom:10px}
+  #miniBanner.show{display:flex}
+  #miniBanner .mt{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:-.4px;color:var(--paper)}
+  #miniBanner .ml{display:flex;gap:6px;align-items:center}
+  #miniBanner .ml img{height:16px;width:auto;background:var(--paper);border-radius:3px;padding:2px 4px}
 </style></head><body><div class="wrap">
 
   <header class="masthead">
@@ -52,6 +58,8 @@
     <div class="tagrow" id="hdrtags"></div>
   </header>
 
+  <div id="homesticky">
+  <div id="miniBanner"><span class="mt">Delivery // Performance Index</span><span class="ml" id="miniLogos"></span></div>
   <div class="controls">
     <input id="search" placeholder="Search product or SKU…" autocomplete="off">
     <span class="lbl">Sort</span>
@@ -63,6 +71,7 @@
       <option value="rto">Worst RTO</option>
     </select>
     <div class="brandchips" id="brandchips"></div>
+  </div>
   </div>
   <div id="countline"></div>
   <div id="loadmsg">Loading live data from Supabase…</div>
@@ -88,7 +97,7 @@ async function load(){
     ROWS=await res.json();
     document.getElementById('loadmsg').style.display='none';
     document.getElementById('grid').style.display='grid';
-    buildHeader(); buildBrandChips(); render();
+    buildHeader(); buildBrandChips(); render(); setupHomeSticky();
   }catch(e){document.getElementById('loadmsg').innerHTML='Could not load: '+e.message;}
 }
 function buildHeader(){
@@ -96,8 +105,15 @@ function buildHeader(){
   const orders=ROWS.reduce((a,x)=>a+x.n_orders,0);
   const freshest=ROWS.reduce((a,x)=>x.last_snapshot>a?x.last_snapshot:a,'');
   document.getElementById('hdrsub').textContent=products.size+' products · '+brands.length+' brands · '+orders.toLocaleString('en-IN')+' orders · data as of '+fmtDate(freshest);
-  var LOGOH={flanq:22,snugllama:26,dellulu:34};
-  document.getElementById('hdrtags').innerHTML=brands.map(b=>{var k=(b||'').toLowerCase();var lg=LOGOS[k];var h=LOGOH[k]||22;return lg?'<span class="tag logotag"><img style="height:'+h+'px" src="'+lg+'" alt="'+b+'"></span>':'<span class="tag">'+b+'</span>';}).join('');
+  var LOGOH={flanq:19,snugllama:22,dellulu:29};
+  document.getElementById('hdrtags').innerHTML=brands.map(b=>{var k=(b||'').toLowerCase();var lg=LOGOS[k];var h=LOGOH[k]||19;return lg?'<span class="tag logotag"><img style="height:'+h+'px" src="'+lg+'" alt="'+b+'"></span>':'<span class="tag">'+b+'</span>';}).join('');
+  var ml=document.getElementById('miniLogos'); if(ml){ml.innerHTML=brands.map(b=>{var k=(b||'').toLowerCase();var lg=LOGOS[k];return lg?'<img src="'+lg+'" alt="'+b+'">':'';}).join('');}
+}
+function setupHomeSticky(){
+  var mh=document.querySelector('header.masthead'), mb=document.getElementById('miniBanner');
+  if(!mh||!mb)return;
+  var upd=function(){ mb.classList.toggle('show', mh.getBoundingClientRect().bottom < 8); };
+  window.addEventListener('scroll',upd,{passive:true}); upd();
 }
 function buildBrandChips(){
   const brands=['All',...[...new Set(ROWS.map(x=>x.brand))].sort()];
