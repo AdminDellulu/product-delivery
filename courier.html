@@ -186,7 +186,7 @@ footer{margin-top:40px;border-top:2px dashed var(--grey);padding-top:14px;font-s
 
 
 <div class="wrap">
-<header class="masthead"><div><h1>SnugLlama // Courier Performance</h1><div class="sub" id="sub">ITL EXPORT · loading…</div></div><div class="tagrow" id="tagrow"></div></header>
+<header class="masthead"><div><h1>Courier //<br>Performance</h1><div class="sub" id="sub">ITL EXPORT · loading…</div></div><div class="tagrow" id="tagrow"></div></header>
 </div>
 
 <div class="filterbar"><div class="fin">
@@ -257,7 +257,7 @@ async function fetchD(brand){
  try{ D=await fetchD(BRAND); }
  catch(e){ var sb=document.getElementById('sub'); if(sb)sb.textContent='Failed to load data — '+e.message; console.error(e); return; }
  try{
-  document.querySelector('header.masthead h1').textContent=(D.meta.store||'All Brands')+' // Courier Performance';
+  document.querySelector('header.masthead h1').innerHTML=(D.meta.store||'All Brands')+' //<br>Courier Performance';
   document.title=(D.meta.store||'All Brands')+' — Courier Performance';
  }catch(e){}
 
@@ -413,7 +413,7 @@ function renderProducts(bc,total,T){let shown=0;
    const rowsH=prods.map(([pn,pr])=>{const px=metrics(pr);const zs2=speedByDim(pr,ZI,CARDZ);shown++;
      let zm='';CARDZ.forEach(z=>{const v=zs2[z];zm+=`<i class="f-${spdC(v.m)}" title="Zone ${z}: ${v.m==null?'n/a':v.m+'d'}">${v.m==null?'·':v.m}</i>`;});
      return `<details class="prod"><summary class="prow"><div class="pcar">▸</div><div class="pn"><div class="nm">${pn}</div><div class="sub">${px.n} ord · ${Math.round(1000*px.n/o.rows.length)/10}%</div></div>${pcell('Del. rate',fmt(px.dr,'%'),drC(px.dr),px.dr,bandCol(drC(px.dr)))}${pcell('RTO',fmt(px.rto,'%'),px.rto==null?'na':(px.rto<=20?'g':px.rto<=30?'a':'r'))}${pcell('Med p→d',px.spd==null?'—':px.spd+'d',spdC(px.spd))}${pcell('Breach',fmt(px.brh,'%'),brC(px.brh))}${pcell('Billed kg',(px.bwKg||0).toFixed(2),px.overPct>=80?'r':px.overPct>=50?'a':'')}${pcell('Avg frt',inr(px.frAvgShipped),'')}<div class="pc zg"><div class="l">Zone A→E</div><div class="zmini">${zm}</div></div></summary>${prodDetail(pr)}</details>`;}).join('');
-   return `<details class="pcourier" ${i<2?'open':''}><summary><span class="snm">${o.c}</span>${chips}<span class="sst">${o.rows.length.toLocaleString('en-IN')} ord · ${prods.length} prod</span></summary>${score}<div class="plist">${rowsH}</div></details>`;}).join('');
+   return `<details class="pcourier"><summary><span class="snm">${o.c}</span>${chips}<span class="sst">${o.rows.length.toLocaleString('en-IN')} ord · ${prods.length} prod</span></summary>${score}<div class="plist">${rowsH}</div></details>`;}).join('');
  document.getElementById('prod').innerHTML=html||'<div class="note">No products match this filter / threshold in the window.</div>';
  document.getElementById('prodcount').textContent=shown+' PRODUCT CARDS';
 }
