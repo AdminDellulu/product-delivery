@@ -133,30 +133,49 @@
   .methodef code{background:#efe7cf;padding:1px 5px;border:1px solid var(--amberD);border-radius:3px}
   /* loader / error (v1 minimal, no design change to sections) */
   #loadmsg{font-family:'Space Grotesk',sans-serif;font-size:13px;color:#6b685f;padding:40px 0;text-align:center}
+
+  html{scroll-behavior:smooth}
+  #topbar{position:sticky;top:0;z-index:60;background:var(--paper);display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;margin-bottom:16px;border-bottom:2px solid var(--line)}
+  #topbar .back{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink);text-decoration:none;border:2px solid var(--line);background:var(--card);box-shadow:3px 3px 0 var(--shadow);border-radius:var(--radius);padding:7px 13px;white-space:nowrap}
+  #topbar .brandbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+  #topbar .blabel{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--grey)}
+  .bpill{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;padding:5px 11px;border:2px solid var(--line);border-radius:20px;background:var(--card);cursor:pointer;box-shadow:2px 2px 0 var(--shadow);text-decoration:none;color:var(--ink)}
+  .bpill.on{background:var(--ink);color:var(--paper)}
+  #stickyhead{position:sticky;top:56px;z-index:55;background:var(--ink);color:var(--paper);border:2px solid var(--line);border-radius:var(--radius);box-shadow:4px 4px 0 var(--shadow);padding:11px 16px;margin-bottom:14px;display:none;gap:14px;align-items:center;flex-wrap:wrap}
+  #stickyhead.show{display:flex}
+  #stickyhead .shname{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:-.2px;text-transform:uppercase;color:var(--paper);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44%}
+  .chiprow{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+  #stickyhead .chiprow{margin-left:auto}
+  a.mchip{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;letter-spacing:.2px;padding:6px 10px;border:1.5px solid var(--line);border-radius:4px;text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;white-space:nowrap;transition:transform .06s}
+  a.mchip:hover{transform:translateY(-1px)}
+  .mc-amber{background:var(--amber);color:var(--ink);border-color:var(--amberD)}
+  .mc-gold{background:#EBC675;color:var(--ink);border-color:var(--amberD)}
+  .mc-green{background:var(--green);color:#fff;border-color:var(--greenD)}
+  .mc-red{background:var(--red);color:#fff;border-color:var(--redD)}
+  .mc-violet{background:var(--blue);color:#fff;border-color:var(--line)}
+  .seclabel{scroll-margin-top:122px}
 </style></head><body><div class="wrap">
 
   <div id="loadmsg">Loading live data from Supabase…</div>
   <div id="app" style="display:none">
 
-  <a href="index.html" style="display:inline-block;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink);text-decoration:none;border:2px solid var(--line);background:var(--card);box-shadow:3px 3px 0 var(--shadow);border-radius:var(--radius);padding:7px 13px;margin-bottom:16px">← All products</a>
+  <div id="topbar">
+    <a class="back" href="index.html">← All products</a>
+    <div class="brandbar" id="brandbar"><span class="blabel">Brand</span></div>
+  </div>
+
+  <div id="stickyhead"><span class="shname" id="shName">—</span><div class="chiprow" id="shChips"></div></div>
 
   <div id="freshBanner" style="border:2px solid var(--line);border-radius:var(--radius);box-shadow:4px 4px 0 var(--shadow);padding:13px 18px;margin-bottom:18px;color:#fff;font-size:12.5px;font-family:'Space Grotesk',sans-serif;font-weight:600">—</div>
 
   <header class="masthead">
     <div><h1 id="prodTitle">Delivery Performance</h1>
       <div class="sub" id="hdrsub">—</div></div>
-    <div class="tagrow">
-      <span class="tag solid" id="tgRealised">—</span>
-      <span class="tag" id="tgDel">—</span><span class="tag" id="tgRto">—</span>
-      <span class="tag" id="tgCod">—</span><span class="tag" id="tgTier">—</span>
-      <span class="tag alert" id="tgStuck">—</span></div>
+    <div class="chiprow tagrow" id="mhChips"></div>
   </header>
 
-  <div id="brandbar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:-8px 0 22px">
-    <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--grey)">Brand</span>
-  </div>
 
-  <div class="seclabel"><span class="ix">01 /</span> Headline numbers</div>
+  <div class="seclabel" id="s01"><span class="ix">01 /</span> Headline numbers</div>
   <div class="grid g4">
     <div class="card kpi-green"><div class="topbar bg-green"></div><div class="kix">[ A ]</div><div class="klabel">Delivery Rate · All-Time</div><div class="kval" id="kA">—</div><div class="ksub" id="kAsub">—</div></div>
     <div class="card kpi-red"><div class="topbar bg-red"></div><div class="kix">[ B ]</div><div class="klabel">RTO Rate · All-Time</div><div class="kval" id="kB">—</div><div class="ksub" id="kBsub">—</div></div>
@@ -170,7 +189,7 @@
     <div class="splitbar" id="eBar" style="height:30px;margin-top:12px"></div>
   </div>
 
-  <div class="seclabel"><span class="ix">02 /</span> Financials — revenue &amp; shipping</div>
+  <div class="seclabel" id="s02"><span class="ix">02 /</span> Financials — revenue &amp; shipping</div>
   <div class="grid g3">
     <div class="card kpi-blue"><div class="topbar bg-ink"></div><div class="kix">[ TOP LINE ]</div><div class="klabel">Total Revenue · GMV ordered</div><div class="kval" id="fGmv">—</div><div class="ksub" id="fGmvSub">—</div></div>
     <div class="card kpi-money"><div class="topbar bg-green"></div><div class="kix">[ REALISED ]</div><div class="klabel">Realised Revenue · delivered</div><div class="kval" id="fReal">—</div><div class="ksub" id="fRealSub">—</div><div class="meter"><span id="fRealMeter" style="width:0%;background:var(--green)"></span></div></div>
@@ -190,7 +209,7 @@
   </div>
   <div class="note"><h3>Reading the freight numbers</h3><p id="noteFreight">—</p></div>
 
-  <div class="seclabel"><span class="ix">03 /</span> Payment mode split — prepaid vs COD</div>
+  <div class="seclabel" id="s03"><span class="ix">03 /</span> Payment mode split — prepaid vs COD</div>
   <div class="grid g3">
     <div class="card"><div class="kix">[ LAST 15 DAYS ]</div><div class="klabel" id="p15n">—</div><div class="paystat"><b style="color:var(--greenD)" id="p15pre">—</b> Prepaid<span>·</span><b style="color:var(--amberD)" id="p15cod">—</b> COD</div><div class="splitbar" id="p15bar"></div></div>
     <div class="card"><div class="kix">[ LAST 30 DAYS ]</div><div class="klabel" id="p30n">—</div><div class="paystat"><b style="color:var(--greenD)" id="p30pre">—</b> Prepaid<span>·</span><b style="color:var(--amberD)" id="p30cod">—</b> COD</div><div class="splitbar" id="p30bar"></div></div>
@@ -202,7 +221,7 @@
     <div class="chartcard"><h3>Weekly Split Table</h3><div class="cdesc">Prepaid / COD counts and COD share by week.</div><table id="payTable"><thead><tr><th>Week of</th><th>Prepaid</th><th>COD</th><th>Total</th><th>COD %</th></tr></thead><tbody></tbody></table></div>
   </div>
 
-  <div class="seclabel"><span class="ix">04 /</span> Delivery rate by window</div>
+  <div class="seclabel" id="s04"><span class="ix">04 /</span> Delivery rate by window</div>
   <div class="grid g3">
     <div class="card"><div class="kix">[ LAST 15 DAYS ]</div><div class="klabel" id="d15lab">—</div><div class="kval" id="d15rate" style="color:var(--greenD)">—</div><div class="ksub" id="d15sub">—</div><div class="meter"><span id="d15meter" style="width:0%;background:var(--green)"></span></div><div class="conf"><span class="clabel">CONCLUDED</span><span class="cchip" id="d15chip">—</span><span class="cpct" id="d15pct">—</span></div></div>
     <div class="card"><div class="kix">[ LAST 30 DAYS ]</div><div class="klabel" id="d30lab">—</div><div class="kval" id="d30rate" style="color:var(--greenD)">—</div><div class="ksub" id="d30sub">—</div><div class="meter"><span id="d30meter" style="width:0%;background:var(--green)"></span></div><div class="conf"><span class="clabel">CONCLUDED</span><span class="cchip" id="d30chip">—</span><span class="cpct" id="d30pct">—</span></div></div>
@@ -210,24 +229,24 @@
   </div>
   <div class="ksub" id="note04" style="margin-top:11px;color:#6b685f">—</div>
 
-  <div class="seclabel"><span class="ix">05 /</span> Cohort trend (by order week)</div>
+  <div class="seclabel" id="s05"><span class="ix">05 /</span> Cohort trend (by order week)</div>
   <div class="chartcard"><h3>Order Volume vs Delivery Rate vs Maturity</h3><div class="cdesc">Bars = orders that month. Solid = delivery rate. Dashed = % concluded.</div><div class="canee h-tall"><canvas id="monthChart"></canvas></div>
     <div class="legend"><span><i class="swatch bg-blue"></i>Orders placed</span><span><i class="swatch bg-green"></i>Delivery rate %</span><span><i class="swatch" style="background:repeating-linear-gradient(90deg,var(--ink) 0 4px,transparent 4px 7px)"></i>Maturity %</span></div></div>
 
-  <div class="seclabel"><span class="ix">06 /</span> Where every order stands</div>
+  <div class="seclabel" id="s06"><span class="ix">06 /</span> Where every order stands</div>
   <div class="grid g2">
     <div class="chartcard"><h3>Full Status Distribution</h3><div class="cdesc" id="statusDesc">—</div><div class="canee h-mid"><canvas id="statusChart"></canvas></div></div>
     <div class="chartcard"><h3>Concluded Orders — Delivered vs Returned</h3><div class="cdesc" id="rtoDesc">—</div><div class="canee h-mid"><canvas id="rtoChart"></canvas></div>
       <div class="legend" id="rtoLegend"></div></div>
   </div>
 
-  <div class="seclabel"><span class="ix">07 /</span> Weekly detail</div>
+  <div class="seclabel" id="s07"><span class="ix">07 /</span> Weekly detail</div>
   <div class="grid g2">
     <div class="chartcard"><h3>Weekly Delivery Rate + Maturity</h3><div class="cdesc">Point colour = maturity (green ≥90%, amber ≥60%, red below).</div><div class="canee h-mid"><canvas id="weekChart"></canvas></div></div>
     <div class="chartcard"><h3>Weekly Cohort Table</h3><div class="cdesc">Highlighted rows are &lt;60% concluded — rate provisional.</div><table id="weekTable"><thead><tr><th>Week of</th><th>Orders</th><th>Deliv.</th><th>Concl.</th><th>Rate</th><th>Mature</th></tr></thead><tbody></tbody></table></div>
   </div>
 
-  <div class="seclabel"><span class="ix">08 /</span> Delivery speed — order to delivered</div>
+  <div class="seclabel" id="s08"><span class="ix">08 /</span> Delivery speed — order to delivered</div>
   <div class="grid g3">
     <div class="card"><div class="topbar bg-amber"></div><div class="kix">[ AVERAGE ]</div><div class="klabel">Order → Delivered</div><div class="kval" id="spAvg" style="color:var(--amberD)">—</div><div class="ksub" id="spAvgSub">—</div></div>
     <div class="card"><div class="kix">[ TYPICAL ]</div><div class="klabel">Median Delivery</div><div class="kval" id="spMed" style="color:var(--blue)">—</div><div class="ksub">half arrive within this</div></div>
@@ -242,7 +261,7 @@
       <div class="ksub" id="spRead" style="margin-top:11px;color:#6b685f">—</div></div>
   </div>
 
-  <div class="seclabel"><span class="ix">09 /</span> NDR &amp; returns recovery</div>
+  <div class="seclabel" id="s09"><span class="ix">09 /</span> NDR &amp; returns recovery</div>
   <div class="grid g4">
     <div class="card"><div class="topbar bg-amber"></div><div class="kix">[ ENTERED NDR ]</div><div class="klabel">Needed 2+ attempts</div><div class="kval" id="ndrEnt" style="color:var(--amberD)">—</div><div class="ksub">orders hit a failed attempt</div></div>
     <div class="card kpi-green"><div class="topbar bg-green"></div><div class="kix">[ RECOVERED ]</div><div class="klabel">Saved → Delivered</div><div class="kval" id="ndrRec">—</div><div class="ksub">rescued after a failed attempt</div></div>
@@ -256,7 +275,7 @@
       <div class="note" style="margin-top:18px"><h3>The opportunity</h3><p id="ndrNote">—</p></div></div>
   </div>
 
-  <div class="seclabel"><span class="ix">10 /</span> Geography — where orders go</div>
+  <div class="seclabel" id="s10"><span class="ix">10 /</span> Geography — where orders go</div>
   <div class="tierbanner">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px">
       <div><div class="big" id="tierBig">—</div><div class="sub" id="tierSub">—</div></div>
@@ -268,7 +287,7 @@
     <div class="chartcard"><h3>Top Cities by Orders</h3><div class="cdesc">Top cities (normalised). Bars coloured by delivery rate.</div><div class="canee" style="height:430px"><canvas id="cityChart"></canvas></div></div>
   </div>
 
-  <div class="seclabel"><span class="ix">11 /</span> Stuck orders — placed 4+ days ago, not yet in transit</div>
+  <div class="seclabel" id="s11"><span class="ix">11 /</span> Stuck orders — placed 4+ days ago, not yet in transit</div>
   <div id="stuckWrap"></div>
 
   <div class="methodef" id="methodef"><b>METHODOLOGY.</b> Unique order numbers, not line items. <b>Delivery rate</b> = Delivered ÷ Concluded; <b>Concluded</b> = Delivered + all RTO states. In-flight &amp; cancelled excluded. <b>Realised revenue</b> = Order Total of Delivered; GMV = all orders. Freight uses billed Total Freight else accrued Unbilled; RTO reverse cost estimated at 2× forward. <b>NDR</b> entrants = 2+ attempts; recovery = delivered ÷ (delivered + RTO). <b>Stuck</b> = age ≥ 4 d, still Manifested/Picked Up. Tiers: T1 metros+NCR, T2 large cities, T3 rest. <span id="methWin">—</span></div>
@@ -300,15 +319,33 @@ const fmtDate=s=>{if(!s)return'—';const d=new Date(s);return d.getUTCDate().to
 const splitHTML=(pre,cod,total)=>{const pp=total?(pre/total*100):0,cp=total?(cod/total*100):0;
   return '<div style="width:'+pp.toFixed(1)+'%;background:var(--green)">'+pp.toFixed(1)+'%</div><div style="width:'+cp.toFixed(1)+'%;background:var(--amberD)">'+cp.toFixed(1)+'%</div>';};
 
+function chipHTML(R){
+  var h=R.headline,f=R.financials,ti=R.tiers;
+  var stuck=(D.stuck&&D.stuck.length)||0;
+  var del=h.delivery_rate>=70?'mc-green':h.delivery_rate>=50?'mc-amber':'mc-red';
+  var st=stuck>0?'mc-red':'mc-green';
+  return '<a class="mchip mc-amber" href="#s02">Realised '+Lk(f.realised)+' / '+Lk(f.gmv)+'</a>'+
+    '<a class="mchip '+del+'" href="#s04">Delivery '+h.delivery_rate+'%</a>'+
+    '<a class="mchip mc-red" href="#s09">RTO '+h.rto_rate+'%</a>'+
+    '<a class="mchip mc-gold" href="#s03">COD '+h.cod_pct+'%</a>'+
+    '<a class="mchip mc-violet" href="#s10">Tier 1 · '+Math.round(ti.t1_pct)+'%</a>'+
+    '<a class="mchip '+st+'" href="#s11">'+stuck+' stuck</a>';
+}
+function setupSticky(){
+  var mh=document.querySelector('.masthead'), sh=document.getElementById('stickyhead');
+  if(!mh||!sh)return;
+  var upd=function(){ sh.classList.toggle('show', mh.getBoundingClientRect().bottom < 66); };
+  window.addEventListener('scroll',upd,{passive:true}); upd();
+}
 function renderBrandBar(m){
   const bar=document.getElementById('brandbar'); if(!bar)return;
   const brands=['All',...(m.brands||[])]; const sel=m.brand_selected||'All';
   const base='product.html?product='+encodeURIComponent(m.product||PRODUCT);
   bar.querySelectorAll('a').forEach(a=>a.remove());
-  if(brands.length<=2){bar.style.display='none';return;} // single-brand product: no filter needed
+  if(brands.length<=2){bar.style.display='none';return;}
+  bar.style.display='flex';
   brands.forEach(b=>{const on=(b===sel);const href=b==='All'?base:base+'&brand='+encodeURIComponent(b);
-    const a=document.createElement('a');a.href=href;a.textContent=b;
-    a.style.cssText="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;padding:6px 13px;border:2px solid var(--line);border-radius:20px;box-shadow:2px 2px 0 var(--shadow);text-decoration:none;cursor:pointer;"+(on?'background:var(--ink);color:var(--paper);':'background:var(--card);color:var(--ink);');
+    const a=document.createElement('a');a.href=href;a.textContent=b;a.className='bpill'+(on?' on':'');
     bar.appendChild(a);});
 }
 async function load(){
@@ -324,6 +361,7 @@ async function load(){
     populate(R);
     document.getElementById('loadmsg').style.display='none';
     document.getElementById('app').style.display='block';
+    setupSticky();
     renderCharts();
   }catch(e){
     document.getElementById('loadmsg').innerHTML='Could not load live data: '+e.message+'<br><span style="font-size:11px">Check Supabase connectivity / SKU.</span>';
@@ -346,10 +384,7 @@ function populate(R){
   document.title=disp+' — Delivery Performance';
   T('hdrsub',(m.brand_selected||'All brands')+' · '+disp+' · Orders '+fmtDate(m.first_order)+' – '+fmtDate(m.last_order)+' · n = '+m.n_orders+' orders');
   renderBrandBar(m);
-  T('tgRealised','Realised '+Lk(f.realised)+' / '+Lk(f.gmv));
-  T('tgDel','Delivery '+h.delivery_rate+'%'); T('tgRto','RTO '+h.rto_rate+'%');
-  T('tgCod','COD '+h.cod_pct+'%'); T('tgTier','Tier 1 · '+Math.round(ti.t1_pct)+'%');
-  T('tgStuck',(D.stuck.length)+' stuck · not picked');
+  var ch=chipHTML(R); H('mhChips',ch); H('shChips',ch); T('shName',disp);
   // 01
   T('kA',h.delivery_rate+'%'); T('kAsub',h.delivery_rate? (R.concluded.counts[0]+' delivered / '+h.concluded+' concluded'):'—');
   T('kB',h.rto_rate+'%'); T('kBsub',(h.concluded-R.concluded.counts[0])+' returned / '+h.concluded+' concluded');
