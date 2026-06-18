@@ -361,8 +361,8 @@ async function load(){
     populate(R);
     document.getElementById('loadmsg').style.display='none';
     document.getElementById('app').style.display='block';
-    renderCharts();
     setupSticky();
+    renderCharts();
   }catch(e){
     document.getElementById('loadmsg').innerHTML='Could not load live data: '+e.message+'<br><span style="font-size:11px">Check Supabase connectivity / SKU.</span>';
   }
