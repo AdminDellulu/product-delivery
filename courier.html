@@ -609,7 +609,7 @@ function renderCDrawer(dim,rows){
    {type:'line',label:'RTO%',data:ck.map(k=>rt(g[k])||0),yAxisID:'y',borderColor:C.redD,borderWidth:2.3,pointRadius:3,tension:.15,order:2}];}
  if(cdwChart)cdwChart.destroy();
  if(HASCHART)cdwChart=new Chart(document.getElementById('dwchart'),{data:{labels,datasets},
-   options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{font:{size:9},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{font:{size:8},maxRotation:55}},y:{min:0,max:pctAxis?104:undefined,grid:gridCfg,ticks:{callback:v=>pctAxis?v+'%':v,font:{size:9}}},y1:{position:'right',beginAtZero:true,grid:{display:false},ticks:{font:{size:9}}}}}});
+   options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{font:{size:11,weight:'700',family:"'Space Grotesk'"},color:C.ink,boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{font:{size:10.5,weight:'700',family:"'Space Grotesk'"},color:C.ink,maxRotation:55}},y:{min:0,max:pctAxis?104:undefined,grid:gridCfg,ticks:{callback:v=>pctAxis?v+'%':v,font:{size:10,weight:'700',family:"'Space Grotesk'"},color:C.ink}},y1:{position:'right',beginAtZero:true,grid:{display:false},ticks:{font:{size:10,weight:'700',family:"'Space Grotesk'"},color:C.ink}}}}});
 }
 function closeCDrawer(){document.getElementById('dwbk').classList.remove('show');document.getElementById('drawer').classList.remove('show');}
 document.getElementById('kpis').addEventListener('click',function(e){const c=e.target.closest('.cdrill');if(c&&c.dataset.cdrill)openCDrawer(c.dataset.cdrill);});
