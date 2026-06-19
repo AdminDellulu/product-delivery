@@ -182,7 +182,19 @@ body{padding-left:78px}
 .brandbar .bchip{font-family:'Space Grotesk';font-weight:700;font-size:11px;padding:6px 13px;border:2px solid var(--line);border-radius:20px;cursor:pointer;user-select:none;color:#6b685f;background:var(--card);box-shadow:2px 2px 0 var(--shadow)}
 .brandbar .bchip:hover{background:#f3ead0}
 .brandbar .bchip.on{background:var(--ink);color:var(--paper)}
-@media(max-width:760px){.snav{flex-direction:row;position:sticky;width:auto;height:auto;bottom:auto;align-items:center;padding:8px 12px}.snav.open{width:auto}.snav nav{flex-direction:row;margin-top:0}.snav nav a .lb{opacity:1}body{padding-left:14px}}
+html{overflow-x:hidden}
+@media(max-width:760px){
+  body{padding-left:0;overflow-x:hidden}
+  .snav{flex-direction:row;position:sticky;top:0;width:auto;height:auto;bottom:auto;align-items:stretch;gap:8px;padding:8px 10px;border-right:none;border-bottom:2px solid var(--line)}
+  .snav-toggle{display:none}
+  .snav nav{flex-direction:row;margin-top:0;gap:8px;flex:1}
+  .snav nav a{flex:1;justify-content:center;padding:9px 6px;gap:7px;text-align:center}
+  .snav nav a .lb{opacity:1;font-size:9.5px;letter-spacing:.2px;line-height:1.1}
+  .snav nav a .ic{flex:0 0 18px}.snav nav a .ic svg{width:17px;height:17px}
+  .filterbar .fin{gap:8px}.frow1,.frow2{gap:8px}
+  .frow1 .brandbar{margin-left:0;flex:1 1 100%}
+  .frow1 .frange{margin-left:0;flex:1 1 100%}
+}
 .card.cdrill,.chartcard.cdrill{cursor:pointer;transition:transform .08s,box-shadow .08s}
 .card.cdrill:hover,.chartcard.cdrill:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--shadow)}
 .drillhint{font-size:8.5px;color:var(--blue);font-weight:700;letter-spacing:.3px}

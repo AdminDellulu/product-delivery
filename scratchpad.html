@@ -7,7 +7,9 @@
 <style>
 :root{--ink:#1C1B19;--line:#2E2D27;--paper:#F4EFE2;--card:#FBF8EE;--shadow:rgba(28,27,25,.18);--green:#2C6E5D;--greenD:#1E5446;--red:#E1502A;--redD:#B83C18;--amber:#EBB12E;--amberD:#C8901C;--blue:#6B5DA6;--grey:#A39C8C;--radius:6px}
 *{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden}
 body{background:var(--paper);color:var(--ink);font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:13px;line-height:1.45;padding:0 0 60px}
+@media(max-width:760px){.wrap{padding:0 14px}.bar .fin{gap:8px}}
 .wrap{max-width:1240px;margin:0 auto;padding:0 20px}
 h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 header.mast{border:2px solid var(--line);background:var(--ink);color:var(--paper);padding:18px 22px;box-shadow:5px 5px 0 var(--shadow);border-radius:var(--radius);margin:22px 0 0;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px}

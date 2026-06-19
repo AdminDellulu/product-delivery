@@ -68,7 +68,19 @@
 .snav nav a:hover{background:rgba(244,239,226,.1);color:var(--paper)}
 .snav nav a.active{background:var(--amber);color:var(--ink)}
 body{padding-left:78px}
-@media(max-width:760px){.snav{flex-direction:row;position:sticky;width:auto;height:auto;bottom:auto;align-items:center;padding:8px 12px}.snav.open{width:auto}.snav nav{flex-direction:row;margin-top:0}.snav nav a .lb{opacity:1}body{padding-left:14px}}
+html{overflow-x:hidden}
+@media(max-width:760px){
+  body{padding:16px 14px 64px;overflow-x:hidden}
+  .snav{flex-direction:row;position:sticky;top:0;width:auto;height:auto;bottom:auto;align-items:stretch;gap:8px;padding:8px 10px;border-right:none;border-bottom:2px solid var(--line);border-radius:var(--radius);margin-bottom:12px}
+  .snav-toggle{display:none}
+  .snav nav{flex-direction:row;margin-top:0;gap:8px;flex:1}
+  .snav nav a{flex:1;justify-content:center;padding:9px 6px;gap:7px;text-align:center}
+  .snav nav a .lb{opacity:1;font-size:9.5px;letter-spacing:.2px;line-height:1.1}
+  .snav nav a .ic{flex:0 0 18px}.snav nav a .ic svg{width:17px;height:17px}
+  .controls{gap:10px}
+  .controls input{min-width:0;flex:1 1 100%}
+  .controls .brandchips{flex:1 1 100%}
+}
 .modal{display:none;position:fixed;inset:0;background:rgba(28,27,25,.5);z-index:300;align-items:center;justify-content:center;padding:28px}
 .modal.show{display:flex}
 .modal-box{background:var(--card);border:2px solid var(--line);box-shadow:8px 8px 0 var(--shadow);border-radius:var(--radius);max-width:1040px;width:100%;max-height:86vh;overflow:hidden;padding:20px 20px 22px;position:relative;display:flex;flex-direction:column}
