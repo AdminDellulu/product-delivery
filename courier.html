@@ -187,7 +187,9 @@ body{padding-left:78px}
 .card.cdrill:hover,.chartcard.cdrill:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--shadow)}
 .drillhint{font-size:8.5px;color:var(--blue);font-weight:700;letter-spacing:.3px}
 .cmini{display:none}
-.filterbar.scrolled .cmini{display:flex;align-items:center;gap:7px;flex-wrap:wrap;background:var(--ink);color:var(--paper);border:2px solid var(--line);border-radius:var(--radius);padding:8px 14px;margin-bottom:9px;box-shadow:3px 3px 0 var(--shadow)}
+.filterbar.scrolled .cmini{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--ink);color:var(--paper);border:2px solid var(--line);border-radius:var(--radius);padding:8px 14px;margin-bottom:9px;box-shadow:3px 3px 0 var(--shadow)}
+.cmini .cmtitle{font-family:'Space Grotesk';font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.cmini .cmtags{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-left:auto}
 .cmini .tag{font-size:10.5px;padding:4px 9px}
 .filterbar.scrolled .frow1 input[type=date]{font-size:11px;padding:3px 5px}
 .filterbar.scrolled .frow1 .preset{font-size:10px;padding:4px 8px}
@@ -404,7 +406,7 @@ function render(lo,hi){
  document.getElementById('frange').textContent=rows.length.toLocaleString('en-IN')+' ORDERS · '+human(lo)+' → '+human(hi);
  const tagsHTML=`<span class="tag solid">${human(lo)}–${human(hi)}</span><span class="tag g">Delivery ${fmt(ov.dr,'%')}</span><span class="tag r">RTO ${fmt(ov.rto,'%')}</span><span class="tag">COD ${fmt(ov.codpct,'%')}</span><span class="tag p">${bc.length} couriers</span>`;
  document.getElementById('tagrow').innerHTML=tagsHTML;
- var _cm=document.getElementById('cmini');if(_cm)_cm.innerHTML=tagsHTML;
+ var _cm=document.getElementById('cmini');if(_cm)_cm.innerHTML='<span class="cmtitle">'+(M.store||'All Brands')+' // Courier Performance</span><span class="cmtags">'+tagsHTML+'</span>';
  // maturity banner
  const matpct=rows.length?Math.round(1000*ov.matured/rows.length)/10:100;
  const mcls=matpct>=90?'mg':(matpct>=70?'ma':'mr');const mp=matpct>=90?'mg2':(matpct>=70?'ma2':'mr2');
