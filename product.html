@@ -80,6 +80,11 @@
   .paystat{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;margin:15px 0 2px;color:#5a574f}
   .paystat b{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
   .paystat span{color:var(--grey);margin:0 5px}
+  .pchip{display:inline-flex;align-items:baseline;gap:6px;background:var(--paper);border:2px solid var(--line);border-radius:6px;padding:6px 11px;font-family:'Space Grotesk',sans-serif;box-shadow:2px 2px 0 var(--shadow)}
+  .pchip b{font-size:16px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+  .pchip i{font-style:normal;font-size:11px;font-weight:600;color:#5a574f}
+  .pchip.lead{background:var(--ink);border-color:var(--ink)}
+  .pchip.lead b{color:#fff} .pchip.lead i{color:#cfc8b5}
   .splitbar{display:flex;height:32px;border:2px solid var(--line);border-radius:5px;overflow:hidden;margin-top:13px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px}
   .splitbar div{display:flex;align-items:center;justify-content:center;color:#fff;min-width:0}
   /* ---- table ---- */
@@ -219,6 +224,23 @@ table.dwt td.l{text-align:left;font-family:'Space Grotesk',sans-serif;font-weigh
     <div class="card kpi-blue drill" data-drill="volume"><div class="topbar bg-ink"></div><div class="kix">[ C ] <span class="drillhint">drill ›</span></div><div class="klabel">Total Orders</div><div class="kval" id="kC">—</div><div class="ksub" id="kCsub">—</div></div>
     <div class="card drill" data-drill="inflight"><div class="topbar bg-amber"></div><div class="kix">[ D ] <span class="drillhint">drill ›</span></div><div class="klabel">In-Flight (Not Concluded)</div><div class="kval" id="kD">—</div><div class="ksub" id="kDsub">—</div></div>
   </div>
+  <div class="card drill" data-drill="aov" style="margin-top:18px" id="aovTile">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px">
+      <div style="min-width:200px">
+        <div class="kix">[ AOV ] <span class="drillhint">drill ›</span></div>
+        <div class="klabel">Avg Order Value · all orders</div>
+        <div style="display:flex;align-items:baseline;gap:10px;margin-top:4px">
+          <div class="kval" id="aovBig" style="color:var(--ink);font-size:clamp(30px,4vw,42px);line-height:1">—</div>
+          <div id="aovPrice" style="font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;color:#5a574f">—</div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <div class="kix" style="margin-bottom:8px">SELLING PRICE · ORDERS AT EACH</div>
+        <div id="priceDist" style="display:flex;gap:9px;flex-wrap:wrap"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="card" style="margin-top:18px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">
       <div><span class="kix">[ E ]</span> &nbsp;<span class="klabel" style="display:inline-block">Payment Split · All-Time</span></div>
@@ -422,7 +444,7 @@ function populate(R){
   document.title=disp+' — Delivery Performance';
   T('hdrsub',(m.brand_selected||'All brands')+' · '+disp+' · Orders '+fmtDate(m.first_order)+' – '+fmtDate(m.last_order)+' · n = '+m.n_orders+' orders');
   renderBrandBar(m);
-  var ch=chipHTML(R); H('mhChips',ch); H('shChips',ch); T('shName',disp); T('shMeta',Number(h.total_orders).toLocaleString('en-IN')+' orders');
+  var ch=chipHTML(R); H('mhChips',ch); H('shChips',ch); T('shName',disp); T('shMeta',Number(h.total_orders).toLocaleString('en-IN')+' Orders · Last Order '+fmtDate(m.last_order)+' · AOV '+inr(f.aov_all));
   // 01
   T('kA',h.delivery_rate+'%'); T('kAsub',h.delivery_rate? (R.concluded.counts[0]+' delivered / '+h.concluded+' concluded'):'—');
   T('kB',h.rto_rate+'%'); T('kBsub',(h.concluded-R.concluded.counts[0])+' returned / '+h.concluded+' concluded');
@@ -431,6 +453,17 @@ function populate(R){
   if(matBad){const ke=document.getElementById('kAsub'); if(ke) ke.innerHTML+=' · <b style="color:var(--redD)">provisional</b>';}
   T('ePre',h.prepaid); T('eCod',h.cod); T('eN','n='+h.total_orders);
   H('eBar','<div style="width:'+h.prepaid_pct+'%;background:var(--green)">Prepaid '+h.prepaid_pct+'%</div><div style="width:'+h.cod_pct+'%;background:var(--amberD)">COD '+h.cod_pct+'%</div>');
+  // AOV + selling-price tile (01)
+  T('aovBig',inr(f.aov_all));
+  var _pd=(R.pricing||[]).filter(p=>p&&p[0]>0);
+  if(_pd.length){
+    var _lead=_pd[0];
+    T('aovPrice',_pd.length>1 ? ('list '+inr(_lead[0])+' · '+_pd.length+' price points') : ('list price '+inr(_lead[0])));
+    var _show=_pd.filter((p,i)=>i===0||p[1]>=2).slice(0,4); var _more=_pd.length-_show.length;
+    var _ph=_show.map((p,i)=>'<span class="pchip'+(i===0?' lead':'')+'"><b>'+inr(p[0])+'</b><i>'+Number(p[1]).toLocaleString('en-IN')+' order'+(p[1]===1?'':'s')+'</i></span>').join('');
+    if(_more>0)_ph+='<span class="pchip"><i>+'+_more+' more</i></span>';
+    H('priceDist',_ph);
+  } else { T('aovPrice','—'); H('priceDist','<span class="pchip"><i>no price data</i></span>'); }
   // 02
   T('fGmv',Lk(f.gmv)); T('fGmvSub',inr(f.gmv)+' across '+h.total_orders+' orders');
   T('fReal',Lk(f.realised)); H('fRealSub',inr(f.realised)+' — <b>'+f.realised_pct+'%</b> of GMV banked');
