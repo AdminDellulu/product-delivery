@@ -157,7 +157,39 @@
   .mc-red{background:var(--red);color:#fff;border-color:var(--redD)}
   .mc-violet{background:var(--blue);color:#fff;border-color:var(--line)}
   .seclabel{scroll-margin-top:122px}
-</style></head><body><div class="wrap">
+.card.drill{cursor:pointer;transition:transform .08s,box-shadow .08s}
+.card.drill:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--shadow)}
+.drillhint{font-size:8.5px;color:var(--blue);font-weight:700;letter-spacing:.3px}
+.dwbk{position:fixed;inset:0;background:rgba(28,27,25,.45);z-index:200;display:none}
+.dwbk.show{display:block}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,94vw);background:var(--paper);border-left:2px solid var(--line);box-shadow:-8px 0 0 var(--shadow);z-index:201;transform:translateX(100%);transition:transform .18s ease;display:flex;flex-direction:column;overflow:hidden}
+.drawer.show{transform:translateX(0)}
+.dwhead{background:var(--ink);color:var(--paper);padding:16px 18px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.dwhead h3{font-size:16px;text-transform:uppercase;letter-spacing:.3px;line-height:1}
+.dwhead .dwsub{font-size:10.5px;color:var(--amber);margin-top:6px}
+.dwx{background:transparent;border:none;color:var(--paper);font-size:24px;cursor:pointer;line-height:1}
+.dwtabs{display:flex;gap:6px;flex-wrap:wrap;padding:12px 18px 0}
+.dwtab{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;border:2px solid var(--line);background:var(--card);padding:6px 11px;border-radius:4px;cursor:pointer;box-shadow:2px 2px 0 var(--shadow)}
+.dwtab.on{background:var(--ink);color:var(--paper)}
+.dwbody{padding:14px 18px;overflow:auto;flex:1}
+.dwchart{position:relative;height:210px;margin-bottom:14px}
+.dwfoot{padding:12px 18px;border-top:2px solid var(--line);background:var(--card)}
+.dwfoot a{display:inline-flex;align-items:center;gap:7px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#fff;background:var(--blue);border:2px solid #4f4470;text-decoration:none;padding:9px 14px;border-radius:var(--radius)}
+table.dwt{width:100%;border-collapse:collapse;font-size:11.5px}
+table.dwt th{background:var(--ink);color:var(--paper);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;padding:6px 8px;text-align:right}
+table.dwt th.l{text-align:left}
+table.dwt td{padding:6px 8px;border-bottom:1px solid #e7e2d6;text-align:right;font-variant-numeric:tabular-nums}
+table.dwt td.l{text-align:left;font-family:'Space Grotesk',sans-serif;font-weight:700}
+.tg{color:var(--greenD)}.ta{color:var(--amberD)}.tr{color:var(--redD)}
+</style></head><body>
+<div class="dwbk" id="dwbk"></div>
+<div class="drawer" id="drawer">
+  <div class="dwhead"><div><h3 id="dwttl">—</h3><div class="dwsub" id="dwsub"></div></div><button class="dwx" id="dwx" aria-label="Close">×</button></div>
+  <div class="dwtabs" id="dwtabs"></div>
+  <div class="dwbody"><div class="dwchart"><canvas id="dwchart"></canvas></div><table class="dwt" id="dwtable"></table></div>
+  <div class="dwfoot"><a id="dwopen" target="_blank" rel="noopener">Open in scratch pad ↗</a></div>
+</div>
+<div class="wrap">
 
   <div id="loadmsg">Loading live data from Supabase…</div>
   <div id="app" style="display:none">
@@ -180,10 +212,10 @@
 
   <div class="seclabel" id="s01"><span class="ix">01 /</span> Headline numbers</div>
   <div class="grid g4">
-    <div class="card kpi-green"><div class="topbar bg-green"></div><div class="kix">[ A ]</div><div class="klabel">Delivery Rate · All-Time</div><div class="kval" id="kA">—</div><div class="ksub" id="kAsub">—</div></div>
-    <div class="card kpi-red"><div class="topbar bg-red"></div><div class="kix">[ B ]</div><div class="klabel">RTO Rate · All-Time</div><div class="kval" id="kB">—</div><div class="ksub" id="kBsub">—</div></div>
-    <div class="card kpi-blue"><div class="topbar bg-ink"></div><div class="kix">[ C ]</div><div class="klabel">Total Orders</div><div class="kval" id="kC">—</div><div class="ksub" id="kCsub">—</div></div>
-    <div class="card"><div class="topbar bg-amber"></div><div class="kix">[ D ]</div><div class="klabel">In-Flight (Not Concluded)</div><div class="kval" id="kD">—</div><div class="ksub" id="kDsub">—</div></div>
+    <div class="card kpi-green drill" data-drill="delivery"><div class="topbar bg-green"></div><div class="kix">[ A ] <span class="drillhint">drill ›</span></div><div class="klabel">Delivery Rate · All-Time</div><div class="kval" id="kA">—</div><div class="ksub" id="kAsub">—</div></div>
+    <div class="card kpi-red drill" data-drill="rto"><div class="topbar bg-red"></div><div class="kix">[ B ] <span class="drillhint">drill ›</span></div><div class="klabel">RTO Rate · All-Time</div><div class="kval" id="kB">—</div><div class="ksub" id="kBsub">—</div></div>
+    <div class="card kpi-blue drill" data-drill="volume"><div class="topbar bg-ink"></div><div class="kix">[ C ] <span class="drillhint">drill ›</span></div><div class="klabel">Total Orders</div><div class="kval" id="kC">—</div><div class="ksub" id="kCsub">—</div></div>
+    <div class="card drill" data-drill="inflight"><div class="topbar bg-amber"></div><div class="kix">[ D ] <span class="drillhint">drill ›</span></div><div class="klabel">In-Flight (Not Concluded)</div><div class="kval" id="kD">—</div><div class="ksub" id="kDsub">—</div></div>
   </div>
   <div class="card" style="margin-top:18px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">
@@ -194,9 +226,9 @@
 
   <div class="seclabel" id="s02"><span class="ix">02 /</span> Financials — revenue &amp; shipping</div>
   <div class="grid g3">
-    <div class="card kpi-blue"><div class="topbar bg-ink"></div><div class="kix">[ TOP LINE ]</div><div class="klabel">Total Revenue · GMV ordered</div><div class="kval" id="fGmv">—</div><div class="ksub" id="fGmvSub">—</div></div>
-    <div class="card kpi-money"><div class="topbar bg-green"></div><div class="kix">[ REALISED ]</div><div class="klabel">Realised Revenue · delivered</div><div class="kval" id="fReal">—</div><div class="ksub" id="fRealSub">—</div><div class="meter"><span id="fRealMeter" style="width:0%;background:var(--green)"></span></div></div>
-    <div class="card"><div class="kix">[ TICKET ]</div><div class="klabel">Avg Order Value</div><div class="kval" id="fAov" style="color:var(--ink)">—</div><div class="ksub" id="fAovSub">—</div></div>
+    <div class="card kpi-blue drill" data-drill="revenue"><div class="topbar bg-ink"></div><div class="kix">[ TOP LINE ] <span class="drillhint">drill ›</span></div><div class="klabel">Total Revenue · GMV ordered</div><div class="kval" id="fGmv">—</div><div class="ksub" id="fGmvSub">—</div></div>
+    <div class="card kpi-money drill" data-drill="revenue"><div class="topbar bg-green"></div><div class="kix">[ REALISED ] <span class="drillhint">drill ›</span></div><div class="klabel">Realised Revenue · delivered</div><div class="kval" id="fReal">—</div><div class="ksub" id="fRealSub">—</div><div class="meter"><span id="fRealMeter" style="width:0%;background:var(--green)"></span></div></div>
+    <div class="card drill" data-drill="aov"><div class="kix">[ TICKET ] <span class="drillhint">drill ›</span></div><div class="klabel">Avg Order Value</div><div class="kval" id="fAov" style="color:var(--ink)">—</div><div class="ksub" id="fAovSub">—</div></div>
   </div>
   <div class="grid g2" style="margin-top:18px">
     <div class="chartcard"><h3>Where the GMV Sits</h3><div class="cdesc" id="revDesc">—</div><div class="canee h-mid"><canvas id="revenueChart"></canvas></div>
@@ -544,5 +576,52 @@ D.weeks.labels.forEach((lb,i)=>{var m=D.weeks.maturity[i];var chip=m>=90?'<span 
 }
 
 load();
+/* ===== Drill-down drawer (item 8) ===== */
+const DRILL={
+ delivery:{title:'Delivery rate',dims:[['co','By courier'],['pay','By payment'],['zone','By zone'],['week','By week']]},
+ rto:{title:'RTO rate',dims:[['reason','By RTO reason'],['co','By courier'],['pay','By payment']]},
+ volume:{title:'Order volume',dims:[['co','By courier'],['brand','By brand'],['week','By week']]},
+ inflight:{title:'In-flight & NDR',dims:[['att','By attempts'],['co','By courier']]},
+ revenue:{title:'Revenue',dims:[['brand','By brand'],['co','By courier'],['pay','By payment']]},
+ aov:{title:'Order value',dims:[['co','By courier'],['zone','By zone']]}
+};
+let PORD=null,dwChart,dwDrill;
+async function getPord(){if(PORD)return PORD;try{const res=await fetch(SUPA_URL+'/rest/v1/rpc/get_product_orders',{method:'POST',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_product:PRODUCT,p_brand:BRAND})});PORD=await res.json();}catch(e){PORD={meta:{},rows:[]};}return PORD;}
+function dwPct(n,d){return d?Math.round(1000*n/d)/10:null;}
+function dwWeek(d){const t=new Date(d+'T00:00:00');const day=(t.getDay()+6)%7;t.setDate(t.getDate()-day);return t.toISOString().slice(0,10);}
+function dwGroup(rows,dim){const kf=dim==='week'?(r=>dwWeek(r.d)):(dim==='att'?(r=>r.att>=3?'3+':String(r.att)):(r=>r[dim]||'—'));const g={};for(const r of rows){const k=kf(r);const e=g[k]||(g[k]={n:0,d:0,rt:0,conc:0,gmv:0});e.n++;e.gmv+=r.val;if(r.status==='Delivered'){e.d++;e.conc++;}else if(r.status==='RTO'){e.rt++;e.conc++;}}return g;}
+async function openDrawer(drill){
+  const cfg=DRILL[drill];if(!cfg)return;dwDrill=drill;
+  document.getElementById('dwttl').textContent=cfg.title;
+  document.getElementById('dwbk').classList.add('show');document.getElementById('drawer').classList.add('show');
+  document.getElementById('dwtabs').innerHTML=cfg.dims.map((d,i)=>'<button class="dwtab'+(i===0?' on':'')+'" data-dim="'+d[0]+'">'+d[1]+'</button>').join('');
+  document.querySelectorAll('#dwtabs .dwtab').forEach(t=>t.onclick=()=>{document.querySelectorAll('#dwtabs .dwtab').forEach(x=>x.classList.remove('on'));t.classList.add('on');renderDrawer(t.dataset.dim);});
+  document.getElementById('dwtable').innerHTML='<tbody><tr><td style="padding:20px;color:#6b685f">Loading…</td></tr></tbody>';
+  const D=await getPord();
+  document.getElementById('dwsub').textContent=(D.meta&&D.meta.display||PRODUCT)+' · '+((D.rows||[]).length)+' orders'+(BRAND?' · '+BRAND:' · all brands');
+  renderDrawer(cfg.dims[0][0]);
+}
+function renderDrawer(dim){
+  const rows=(PORD&&PORD.rows)||[];const g=dwGroup(rows,dim);let keys=Object.keys(g);
+  keys.sort(dim==='week'?((a,b)=>a<b?-1:1):(dim==='att'?((a,b)=>(''+a).localeCompare(''+b)):((a,b)=>g[b].n-g[a].n)));
+  const drc=v=>v==null?'':v>=70?'tg':v>=50?'ta':'tr',rtc=v=>v==null?'':v<=20?'tg':v<=33?'ta':'tr';
+  const inr=v=>v>=100000?'₹'+(v/100000).toFixed(2)+'L':'₹'+Math.round(v).toLocaleString('en-IN');
+  const head='<thead><tr><th class="l">'+dim.toUpperCase()+'</th><th>Ord</th><th>Deliv%</th><th>RTO%</th><th>GMV</th></tr></thead>';
+  const body=keys.map(k=>{const e=g[k];const dr=dwPct(e.d,e.conc),rto=dwPct(e.rt,e.conc);return '<tr><td class="l">'+k+'</td><td>'+e.n+'</td><td class="'+drc(dr)+'">'+(dr==null?'—':dr+'%')+'</td><td class="'+rtc(rto)+'">'+(rto==null?'—':rto+'%')+'</td><td>'+inr(e.gmv)+'</td></tr>';}).join('');
+  document.getElementById('dwtable').innerHTML=head+'<tbody>'+body+'</tbody>';
+  const labels=keys,dr=keys.map(k=>dwPct(g[k].d,g[k].conc)||0),rto=keys.map(k=>dwPct(g[k].rt,g[k].conc)||0),vol=keys.map(k=>g[k].n);
+  if(dwChart)dwChart.destroy();
+  if(typeof Chart!=='undefined')dwChart=new Chart(document.getElementById('dwchart'),{data:{labels,datasets:[
+    {type:'bar',label:'Orders',data:vol,yAxisID:'y1',backgroundColor:'rgba(107,93,166,.25)',borderColor:'#6B5DA6',borderWidth:1.4,borderRadius:3,order:3},
+    {type:'line',label:'Deliv%',data:dr,yAxisID:'y',borderColor:'#1E5446',borderWidth:2.3,pointRadius:3,tension:.15,order:1},
+    {type:'line',label:'RTO%',data:rto,yAxisID:'y',borderColor:'#B83C18',borderWidth:2.3,pointRadius:3,tension:.15,order:2}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{font:{size:9},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{font:{size:8},maxRotation:55}},y:{min:0,max:104,grid:{color:'rgba(28,27,25,.07)'},ticks:{callback:v=>v+'%',font:{size:9}}},y1:{position:'right',beginAtZero:true,grid:{display:false},ticks:{font:{size:9}}}}}});
+  document.getElementById('dwopen').href='scratchpad.html?product='+encodeURIComponent(PRODUCT)+(BRAND?'&brand='+encodeURIComponent(BRAND):'')+'&dim='+encodeURIComponent(dim);
+}
+function closeDrawer(){document.getElementById('dwbk').classList.remove('show');document.getElementById('drawer').classList.remove('show');}
+document.querySelectorAll('.card.drill').forEach(c=>c.addEventListener('click',()=>openDrawer(c.dataset.drill)));
+document.getElementById('dwx').addEventListener('click',closeDrawer);
+document.getElementById('dwbk').addEventListener('click',closeDrawer);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
 </script>
 </body></html>
