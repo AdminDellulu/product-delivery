@@ -245,7 +245,7 @@ table.dwt td.l{text-align:left;font-family:'Space Grotesk',sans-serif;font-weigh
   <div class="note"><h3>Reading the freight numbers</h3><p id="noteFreight">—</p></div>
 
   <div class="seclabel" id="s03"><span class="ix">03 /</span> Payment mode split — prepaid vs COD</div>
-  <div class="grid g3">
+  <div class="grid g3 drillgrid" data-drill="payment">
     <div class="card"><div class="kix">[ LAST 15 DAYS ]</div><div class="klabel" id="p15n">—</div><div class="paystat"><b style="color:var(--greenD)" id="p15pre">—</b> Prepaid<span>·</span><b style="color:var(--amberD)" id="p15cod">—</b> COD</div><div class="splitbar" id="p15bar"></div></div>
     <div class="card"><div class="kix">[ LAST 30 DAYS ]</div><div class="klabel" id="p30n">—</div><div class="paystat"><b style="color:var(--greenD)" id="p30pre">—</b> Prepaid<span>·</span><b style="color:var(--amberD)" id="p30cod">—</b> COD</div><div class="splitbar" id="p30bar"></div></div>
     <div class="card"><div class="kix">[ ALL-TIME ]</div><div class="klabel" id="pAn">—</div><div class="paystat"><b style="color:var(--greenD)" id="pApre">—</b> Prepaid<span>·</span><b style="color:var(--amberD)" id="pAcod">—</b> COD</div><div class="splitbar" id="pAbar"></div></div>
@@ -257,7 +257,7 @@ table.dwt td.l{text-align:left;font-family:'Space Grotesk',sans-serif;font-weigh
   </div>
 
   <div class="seclabel" id="s04"><span class="ix">04 /</span> Delivery rate by window</div>
-  <div class="grid g3">
+  <div class="grid g3 drillgrid" data-drill="delivery">
     <div class="card"><div class="kix">[ LAST 15 DAYS ]</div><div class="klabel" id="d15lab">—</div><div class="kval" id="d15rate" style="color:var(--greenD)">—</div><div class="ksub" id="d15sub">—</div><div class="meter"><span id="d15meter" style="width:0%;background:var(--green)"></span></div><div class="conf"><span class="clabel">CONCLUDED</span><span class="cchip" id="d15chip">—</span><span class="cpct" id="d15pct">—</span></div></div>
     <div class="card"><div class="kix">[ LAST 30 DAYS ]</div><div class="klabel" id="d30lab">—</div><div class="kval" id="d30rate" style="color:var(--greenD)">—</div><div class="ksub" id="d30sub">—</div><div class="meter"><span id="d30meter" style="width:0%;background:var(--green)"></span></div><div class="conf"><span class="clabel">CONCLUDED</span><span class="cchip" id="d30chip">—</span><span class="cpct" id="d30pct">—</span></div></div>
     <div class="card"><div class="kix">[ ALL-TIME ]</div><div class="klabel" id="dAlab">—</div><div class="kval" id="dArate" style="color:var(--ink)">—</div><div class="ksub" id="dAsub">—</div><div class="meter"><span id="dAmeter" style="width:0%;background:var(--ink)"></span></div><div class="conf"><span class="clabel">CONCLUDED</span><span class="cchip" id="dAchip">—</span><span class="cpct" id="dApct">—</span></div></div>
@@ -282,7 +282,7 @@ table.dwt td.l{text-align:left;font-family:'Space Grotesk',sans-serif;font-weigh
   </div>
 
   <div class="seclabel" id="s08"><span class="ix">08 /</span> Delivery speed — order to delivered</div>
-  <div class="grid g3">
+  <div class="grid g3 drillgrid" data-drill="speed">
     <div class="card"><div class="topbar bg-amber"></div><div class="kix">[ AVERAGE ]</div><div class="klabel">Order → Delivered</div><div class="kval" id="spAvg" style="color:var(--amberD)">—</div><div class="ksub" id="spAvgSub">—</div></div>
     <div class="card"><div class="kix">[ TYPICAL ]</div><div class="klabel">Median Delivery</div><div class="kval" id="spMed" style="color:var(--blue)">—</div><div class="ksub">half arrive within this</div></div>
     <div class="card kpi-red"><div class="topbar bg-red"></div><div class="kix">[ SLOW TAIL ]</div><div class="klabel">Slowest 10% (p90)</div><div class="kval" id="spP90">—</div><div class="ksub" id="spP90Sub">—</div></div>
@@ -297,7 +297,7 @@ table.dwt td.l{text-align:left;font-family:'Space Grotesk',sans-serif;font-weigh
   </div>
 
   <div class="seclabel" id="s09"><span class="ix">09 /</span> NDR &amp; returns recovery</div>
-  <div class="grid g4">
+  <div class="grid g4 drillgrid" data-drill="ndr">
     <div class="card"><div class="topbar bg-amber"></div><div class="kix">[ ENTERED NDR ]</div><div class="klabel">Needed 2+ attempts</div><div class="kval" id="ndrEnt" style="color:var(--amberD)">—</div><div class="ksub">orders hit a failed attempt</div></div>
     <div class="card kpi-green"><div class="topbar bg-green"></div><div class="kix">[ RECOVERED ]</div><div class="klabel">Saved → Delivered</div><div class="kval" id="ndrRec">—</div><div class="ksub">rescued after a failed attempt</div></div>
     <div class="card"><div class="kix">[ RECOVERY RATE ]</div><div class="klabel">Of concluded NDRs</div><div class="kval" id="ndrRate" style="color:var(--ink)">—</div><div class="ksub" id="ndrRateSub">—</div><div class="meter"><span id="ndrMeter" style="width:0%;background:var(--amber)"></span></div></div>
@@ -583,7 +583,10 @@ const DRILL={
  volume:{title:'Order volume',dims:[['co','By courier'],['brand','By brand'],['week','By week']]},
  inflight:{title:'In-flight & NDR',dims:[['att','By attempts'],['co','By courier']]},
  revenue:{title:'Revenue',dims:[['brand','By brand'],['co','By courier'],['pay','By payment']]},
- aov:{title:'Order value',dims:[['co','By courier'],['zone','By zone']]}
+ aov:{title:'Order value',dims:[['co','By courier'],['zone','By zone'],['brand','By brand']]},
+ payment:{title:'Payment mix',dims:[['pay','Prepaid vs COD'],['co','By courier'],['zone','By zone']]},
+ speed:{title:'Delivery speed',dims:[['zone','By zone'],['tier','By city tier'],['co','By courier'],['week','By week']]},
+ ndr:{title:'NDR & returns recovery',dims:[['att','By attempts'],['reason','By RTO reason'],['co','By courier']]}
 };
 let PORD=null,dwChart,dwDrill;
 async function getPord(){if(PORD)return PORD;try{const res=await fetch(SUPA_URL+'/rest/v1/rpc/get_product_orders',{method:'POST',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_product:PRODUCT,p_brand:BRAND})});PORD=await res.json();}catch(e){PORD={meta:{},rows:[]};}return PORD;}
@@ -609,7 +612,9 @@ function renderDrawer(dim){
   const head='<thead><tr><th class="l">'+dim.toUpperCase()+'</th><th>Ord</th><th>Deliv%</th><th>RTO%</th><th>GMV</th></tr></thead>';
   const body=keys.map(k=>{const e=g[k];const dr=dwPct(e.d,e.conc),rto=dwPct(e.rt,e.conc);return '<tr><td class="l">'+k+'</td><td>'+e.n+'</td><td class="'+drc(dr)+'">'+(dr==null?'—':dr+'%')+'</td><td class="'+rtc(rto)+'">'+(rto==null?'—':rto+'%')+'</td><td>'+inr(e.gmv)+'</td></tr>';}).join('');
   document.getElementById('dwtable').innerHTML=head+'<tbody>'+body+'</tbody>';
-  const labels=keys,dr=keys.map(k=>dwPct(g[k].d,g[k].conc)||0),rto=keys.map(k=>dwPct(g[k].rt,g[k].conc)||0),vol=keys.map(k=>g[k].n);
+  const ck=(dim==='week')?keys:keys.slice(0,12);
+  const trunc=s=>{s=''+s;return s.length>15?s.slice(0,14)+'…':s;};
+  const labels=ck.map(trunc),dr=ck.map(k=>dwPct(g[k].d,g[k].conc)||0),rto=ck.map(k=>dwPct(g[k].rt,g[k].conc)||0),vol=ck.map(k=>g[k].n);
   if(dwChart)dwChart.destroy();
   if(typeof Chart!=='undefined')dwChart=new Chart(document.getElementById('dwchart'),{data:{labels,datasets:[
     {type:'bar',label:'Orders',data:vol,yAxisID:'y1',backgroundColor:'rgba(107,93,166,.25)',borderColor:'#6B5DA6',borderWidth:1.4,borderRadius:3,order:3},
@@ -620,6 +625,7 @@ function renderDrawer(dim){
 }
 function closeDrawer(){document.getElementById('dwbk').classList.remove('show');document.getElementById('drawer').classList.remove('show');}
 document.querySelectorAll('.card.drill').forEach(c=>c.addEventListener('click',()=>openDrawer(c.dataset.drill)));
+document.querySelectorAll('.drillgrid').forEach(gr=>{const dr=gr.dataset.drill;gr.querySelectorAll('.card').forEach(c=>{c.classList.add('drill');const kx=c.querySelector('.kix');if(kx&&!kx.querySelector('.drillhint'))kx.insertAdjacentHTML('beforeend',' <span class="drillhint">drill ›</span>');c.addEventListener('click',()=>openDrawer(dr));});});
 document.getElementById('dwx').addEventListener('click',closeDrawer);
 document.getElementById('dwbk').addEventListener('click',closeDrawer);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});

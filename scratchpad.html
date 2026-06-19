@@ -178,7 +178,9 @@ function renderDim(rs){
     return `<tr><td class="l">${k}</td><td>${e.n}</td><td class="${drC(dr)}">${dr==null?'—':dr+'%'}</td><td class="${rtoC(rto)}">${rto==null?'—':rto+'%'}</td><td>${inrL(e.gmv)}</td></tr>`;}).join('');
   document.getElementById('dimtable').innerHTML=head+'<tbody>'+body+'</tbody>';
   document.getElementById('dimcd').textContent='Delivery & RTO rate by '+dimLabel(dim).toLowerCase()+' · '+keys.length+' groups.';
-  const labels=keys, dr=keys.map(k=>pct(g[k].d,g[k].conc)||0), rto=keys.map(k=>pct(g[k].rt,g[k].conc)||0), vol=keys.map(k=>g[k].n);
+  const ck=(dim==='week')?keys:keys.slice(0,16);
+  const trunc=s=>{s=''+s;return s.length>18?s.slice(0,17)+'…':s;};
+  const labels=ck.map(trunc), dr=ck.map(k=>pct(g[k].d,g[k].conc)||0), rto=ck.map(k=>pct(g[k].rt,g[k].conc)||0), vol=ck.map(k=>g[k].n);
   if(chart)chart.destroy();
   chart=new Chart(document.getElementById('chart'),{data:{labels,datasets:[
     {type:'bar',label:'Orders',data:vol,yAxisID:'y1',backgroundColor:'rgba(107,93,166,.25)',borderColor:C.blue,borderWidth:1.5,borderRadius:3,order:3},

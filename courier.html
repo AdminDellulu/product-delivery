@@ -183,9 +183,39 @@ body{padding-left:78px}
 .brandbar .bchip:hover{background:#f3ead0}
 .brandbar .bchip.on{background:var(--ink);color:var(--paper)}
 @media(max-width:760px){.snav{flex-direction:row;position:sticky;width:auto;height:auto;bottom:auto;align-items:center;padding:8px 12px}.snav.open{width:auto}.snav nav{flex-direction:row;margin-top:0}.snav nav a .lb{opacity:1}body{padding-left:14px}}
+.card.cdrill,.chartcard.cdrill{cursor:pointer;transition:transform .08s,box-shadow .08s}
+.card.cdrill:hover,.chartcard.cdrill:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--shadow)}
+.drillhint{font-size:8.5px;color:var(--blue);font-weight:700;letter-spacing:.3px}
+.cmini{display:none}
+.filterbar.scrolled .cmini{display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--paper);border:2px solid var(--line);border-radius:var(--radius);padding:7px 14px;margin-bottom:9px;box-shadow:3px 3px 0 var(--shadow)}
+.cmini .t{font-family:'Space Grotesk';font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.3px}
+.cmini .s{font-size:10.5px;color:var(--amber)}
+.dwbk{position:fixed;inset:0;background:rgba(43,43,40,.45);z-index:200;display:none}.dwbk.show{display:block}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(580px,94vw);background:var(--paper);border-left:2px solid var(--line);box-shadow:-8px 0 0 var(--shadow);z-index:201;transform:translateX(100%);transition:transform .18s ease;display:flex;flex-direction:column;overflow:hidden}
+.drawer.show{transform:translateX(0)}
+.dwhead{background:var(--ink);color:var(--paper);padding:16px 18px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.dwhead h3{font-size:16px;text-transform:uppercase;letter-spacing:.3px;line-height:1}
+.dwhead .dwsub{font-size:10.5px;color:var(--amber);margin-top:6px}
+.dwx{background:transparent;border:none;color:var(--paper);font-size:24px;cursor:pointer;line-height:1}
+.dwtabs{display:flex;gap:6px;flex-wrap:wrap;padding:12px 18px 0}
+.dwtab{font-family:'Space Grotesk';font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;border:2px solid var(--line);background:var(--card);padding:6px 11px;border-radius:4px;cursor:pointer;box-shadow:2px 2px 0 var(--shadow)}
+.dwtab.on{background:var(--ink);color:var(--paper)}
+.dwbody{padding:14px 18px;overflow:auto;flex:1}
+.dwchart{position:relative;height:210px;margin-bottom:14px}
+table.dwt{width:100%;border-collapse:collapse;font-size:11.5px}
+table.dwt th{background:var(--ink);color:var(--paper);font-family:'Space Grotesk';font-weight:700;font-size:9px;text-transform:uppercase;padding:6px 8px;text-align:right}
+table.dwt th.l{text-align:left}
+table.dwt td{padding:6px 8px;border-bottom:1px solid #ddd7c8;text-align:right;font-variant-numeric:tabular-nums}
+table.dwt td.l{text-align:left;font-family:'Space Grotesk';font-weight:700}
 </style>
 </head>
 <body>
+<div class="dwbk" id="dwbk"></div>
+<div class="drawer" id="drawer">
+  <div class="dwhead"><div><h3 id="dwttl">—</h3><div class="dwsub" id="dwsub"></div></div><button class="dwx" id="dwx" aria-label="Close">×</button></div>
+  <div class="dwtabs" id="dwtabs"></div>
+  <div class="dwbody"><div class="dwchart"><canvas id="dwchart"></canvas></div><table class="dwt" id="dwtable"></table></div>
+</div>
 
 <div class="snav" id="snav">
   <button class="snav-toggle" id="snavToggle" aria-label="Toggle menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg><span class="lb">Menu</span></button>
@@ -199,6 +229,7 @@ body{padding-left:78px}
 <header class="masthead"><div><h1>Courier //<br>Performance</h1><div class="sub" id="sub">ITL EXPORT · loading…</div></div><div class="tagrow" id="tagrow"></div></header>
 </div>
 <div class="filterbar" id="cbar"><div class="fin">
+ <div class="cmini" id="cmini"></div>
  <div class="frow1">
   <label>From</label><input type="date" id="from"><label>To</label><input type="date" id="to">
   <button class="preset" data-d="all">All</button><button class="preset" data-d="90">90D</button><button class="preset" data-d="30">30D</button>
@@ -217,9 +248,9 @@ body{padding-left:78px}
  <p class="lead">Delivery rate = delivered ÷ concluded (in-flight excluded). Each card shows your target (RAG) and the change vs the prior equal-length window (▲ = improving). Median speed is <b>pickup→delivery</b>. Prepaid/COD split exposes the COD penalty.</p>
  <div class="grid g3" id="kpis"></div>
  <div class="grid g3" style="margin-top:16px">
-   <div class="chartcard"><h3>Order outcomes</h3><div class="cdesc">Where every order in the window landed.</div><div class="canee h-low"><canvas id="chOutcome"></canvas></div><div class="legend" id="outLeg"></div></div>
-   <div class="chartcard"><h3>Weekly volume &amp; delivery rate</h3><div class="cdesc">Bars = orders, line = delivery rate; dots turn <b style="color:var(--redD)">red</b> below 70%.</div><div class="canee h-mid"><canvas id="chTrend"></canvas></div></div>
-   <div class="chartcard"><h4>Freight &amp; weight — overbilling</h4><div class="cdesc">ITL bills above your chargeable weight. Avg billed vs chargeable, % overbilled, est. recoverable.</div><div id="wpanel"></div></div>
+   <div class="chartcard cdrill" data-cdrill="volume"><h3>Order outcomes <span class="drillhint">drill ›</span></h3><div class="cdesc">Where every order in the window landed.</div><div class="canee h-low"><canvas id="chOutcome"></canvas></div><div class="legend" id="outLeg"></div></div>
+   <div class="chartcard cdrill" data-cdrill="delivery"><h3>Weekly volume &amp; delivery rate <span class="drillhint">drill ›</span></h3><div class="cdesc">Bars = orders, line = delivery rate; dots turn <b style="color:var(--redD)">red</b> below 70%.</div><div class="canee h-mid"><canvas id="chTrend"></canvas></div></div>
+   <div class="chartcard cdrill" data-cdrill="freight"><h4>Freight &amp; weight — overbilling <span class="drillhint">drill ›</span></h4><div class="cdesc">ITL bills above your chargeable weight. Avg billed vs chargeable, % overbilled, est. recoverable.</div><div id="wpanel"></div></div>
  </div>
 
  <div class="seclabel"><span class="ix">02 /</span>&nbsp;Couriers &amp; products</div>
@@ -372,14 +403,14 @@ function render(lo,hi){
  // KPI cards w/ target + RAG + delta
  const dband=ragHi(ov.dr,T.dr), rband=ragLo(ov.rto,T.rto), bband=ragLo(ov.brh,T.br), sband=ragLo(ov.spd,T.sp);
  const kp=[
-  {b:dband,ix:'[ A ]',l:'Delivery Rate',v:fmt(ov.dr,'%'),tg:`Target ≥${T.dr}%`,dl:deltaHTML(ov.dr,prev.dr,true,'pp'),s:`${ov.d} delivered / ${ov.conc} concluded`,pay:paysub(ov.drPre,ov.drCod,true)},
-  {b:rband,ix:'[ B ]',l:'RTO Rate',v:fmt(ov.rto,'%'),tg:`Target ≤${T.rto}%`,dl:deltaHTML(ov.rto,prev.rto,false,'pp'),s:`${ov.r} returned / ${ov.conc} concluded`,pay:paysub(ov.rtoPre,ov.rtoCod,false)},
-  {b:'ink',ix:'[ C ]',l:'Total Orders',v:ov.n.toLocaleString('en-IN'),tg:'volume',dl:deltaHTML(ov.n,prev.n,true,''),s:`${ov.matured} matured · ${ov.inf} in-flight`},
-  {b:sband,ix:'[ D ]',l:'Median Pickup→Delivery',v:ov.spd==null?'—':ov.spd+'d',tg:`Target ≤${T.sp}d`,dl:deltaHTML(ov.spd,prev.spd,false,'d'),s:'courier transit, delivered'},
-  {b:bband,ix:'[ E ]',l:'EDD Breach',v:fmt(ov.brh,'%'),tg:`Target ≤${T.br}%`,dl:deltaHTML(ov.brh,prev.brh,false,'pp'),s:`${ov.brN} late of ${ov.brD} delivered`},
-  {b:'green',ix:'[ F ]',l:'Avg Shipping Cost',v:inr(ov.frAvgShip),tg:'per order',dl:deltaHTML(ov.frAvgShip,prev.frAvgShip,false,''),s:`₹${ov.frAvgShipped} per shipped order`}];
+  {b:dband,ix:'[ A ]',dr:'delivery',l:'Delivery Rate',v:fmt(ov.dr,'%'),tg:`Target ≥${T.dr}%`,dl:deltaHTML(ov.dr,prev.dr,true,'pp'),s:`${ov.d} delivered / ${ov.conc} concluded`,pay:paysub(ov.drPre,ov.drCod,true)},
+  {b:rband,ix:'[ B ]',dr:'rto',l:'RTO Rate',v:fmt(ov.rto,'%'),tg:`Target ≤${T.rto}%`,dl:deltaHTML(ov.rto,prev.rto,false,'pp'),s:`${ov.r} returned / ${ov.conc} concluded`,pay:paysub(ov.rtoPre,ov.rtoCod,false)},
+  {b:'ink',ix:'[ C ]',dr:'volume',l:'Total Orders',v:ov.n.toLocaleString('en-IN'),tg:'volume',dl:deltaHTML(ov.n,prev.n,true,''),s:`${ov.matured} matured · ${ov.inf} in-flight`},
+  {b:sband,ix:'[ D ]',dr:'speed',l:'Median Pickup→Delivery',v:ov.spd==null?'—':ov.spd+'d',tg:`Target ≤${T.sp}d`,dl:deltaHTML(ov.spd,prev.spd,false,'d'),s:'courier transit, delivered'},
+  {b:bband,ix:'[ E ]',dr:'breach',l:'EDD Breach',v:fmt(ov.brh,'%'),tg:`Target ≤${T.br}%`,dl:deltaHTML(ov.brh,prev.brh,false,'pp'),s:`${ov.brN} late of ${ov.brD} delivered`},
+  {b:'green',ix:'[ F ]',dr:'freight',l:'Avg Shipping Cost',v:inr(ov.frAvgShip),tg:'per order',dl:deltaHTML(ov.frAvgShip,prev.frAvgShip,false,''),s:`₹${ov.frAvgShipped} per shipped order`}];
  const ragLabel=c=>c==='g'?'<span class="rag g">on target</span>':c==='a'?'<span class="rag a">near</span>':c==='r'?'<span class="rag r">off target</span>':'';
- document.getElementById('kpis').innerHTML=kp.map(x=>`<div class="card"><div class="topbar bg-${x.b==='g'?'green':x.b==='a'?'amber':x.b==='r'?'red':x.b}"></div><div class="kix">${x.ix}</div><div class="klabel">${x.l}</div><div class="kval ${x.b==='g'?'kpi-green':x.b==='r'?'kpi-red':x.b==='a'?'':''}" style="${x.b==='g'?'color:var(--greenD)':x.b==='r'?'color:var(--redD)':x.b==='a'?'color:var(--amberD)':''}">${x.v}</div><div class="krow"><span class="tgt">${x.tg}</span> ${['g','a','r'].includes(x.b)?ragLabel(x.b):''} ${x.dl}</div><div class="ksub">${x.s}</div>${x.pay||''}</div>`).join('');
+ document.getElementById('kpis').innerHTML=kp.map(x=>`<div class="card cdrill" data-cdrill="${x.dr||''}"><div class="topbar bg-${x.b==='g'?'green':x.b==='a'?'amber':x.b==='r'?'red':x.b}"></div><div class="kix">${x.ix} <span class="drillhint">drill ›</span></div><div class="klabel">${x.l}</div><div class="kval ${x.b==='g'?'kpi-green':x.b==='r'?'kpi-red':x.b==='a'?'':''}" style="${x.b==='g'?'color:var(--greenD)':x.b==='r'?'color:var(--redD)':x.b==='a'?'color:var(--amberD)':''}">${x.v}</div><div class="krow"><span class="tgt">${x.tg}</span> ${['g','a','r'].includes(x.b)?ragLabel(x.b):''} ${x.dl}</div><div class="ksub">${x.s}</div>${x.pay||''}</div>`).join('');
  // outcome donut
  if(HASCHART){if(CH.outcome)CH.outcome.destroy();CH.outcome=new Chart(chOutcome,{type:'doughnut',data:{labels:['Delivered','RTO','In-flight','Cancelled'],datasets:[{data:[ov.d,ov.r,ov.inf,ov.canc],backgroundColor:[C.green,C.red,C.blue,C.grey],borderColor:C.card,borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'56%',animation:false,plugins:{legend:{display:false},tooltip:Object.assign({},tip,{callbacks:{label:c=>' '+c.label+': '+c.raw}})}}});}
  document.getElementById('outLeg').innerHTML=[['Delivered',ov.d,C.green],['RTO',ov.r,C.red],['In-flight',ov.inf,C.blue],['Cancelled',ov.canc,C.grey]].map(x=>`<span><span class="swatch" style="background:${x[2]}"></span>${x[0]} ${x[1]}</span>`).join('');
@@ -496,6 +527,54 @@ fEl.addEventListener('change',apply);tEl.addEventListener('change',apply);
 document.querySelectorAll('.preset').forEach(p=>p.addEventListener('click',()=>{let lo,hi=M.dmax;if(p.dataset.d==='all'){lo=M.dmin;hi=M.dmax;}else{const dd=di2d(M.dmax);dd.setDate(dd.getDate()-(+p.dataset.d)+1);lo=d2di(dd);}fEl.value=di2iso(lo);tEl.value=di2iso(hi);render(lo,hi);}));
 render(M.dmin,M.dmax);
 if(HASCHART){try{initCharts();render(curLo,curHi);}catch(e){console.warn('chart init failed; data still rendered',e);}}
+
+/* ===== courier drill drawer ===== */
+const CDRILL={
+ delivery:{title:'Delivery rate',dims:[['co','By courier'],['pay','By payment'],['zone','By zone'],['wk','By week']]},
+ rto:{title:'RTO rate',dims:[['re','By RTO reason'],['co','By courier'],['pay','By payment']]},
+ volume:{title:'Order volume',dims:[['co','By courier'],['pr','By product'],['wk','By week']]},
+ speed:{title:'Delivery speed',dims:[['zone','By zone'],['ti','By city tier'],['co','By courier']]},
+ breach:{title:'EDD breach',dims:[['co','By courier'],['zone','By zone']]},
+ freight:{title:'Freight & shipping',dims:[['co','By courier'],['zone','By zone'],['pr','By product']]}
+};
+let cdwChart;
+function cWeek(di){const d=di2d(di);const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);return di2iso(d2di(d));}
+function cKey(o,dim){switch(dim){case 'co':return CO[o[CI]];case 'pr':return PR[o[PI]];case 'zone':return ZO[o[ZI]];case 'ti':return TZ[o[TI]];case 'pay':return o[PAY]===1?'COD':o[PAY]===0?'Prepaid':'Other';case 're':return o[RE]>=0?RS[o[RE]]:'—';case 'wk':return cWeek(o[DT]);default:return '—';}}
+function cGroup(rows,dim){const g={};for(const o of rows){const k=cKey(o,dim);const e=g[k]||(g[k]={n:0,d:0,r:0,conc:0,gmv:0});e.n++;e.gmv+=o[TT];if(o[ST]==0){e.d++;e.conc++;}else if(o[ST]==1){e.r++;e.conc++;}}return g;}
+function openCDrawer(drill){
+ const cfg=CDRILL[drill];if(!cfg)return;
+ document.getElementById('dwttl').textContent=cfg.title;
+ document.getElementById('dwbk').classList.add('show');document.getElementById('drawer').classList.add('show');
+ const rows=ORD.filter(o=>o[DT]>=curLo&&o[DT]<=curHi);
+ document.getElementById('dwsub').textContent=(M.store||'All Brands')+' · '+rows.length.toLocaleString('en-IN')+' orders · '+human(curLo)+' → '+human(curHi);
+ document.getElementById('dwtabs').innerHTML=cfg.dims.map((d,i)=>'<button class="dwtab'+(i===0?' on':'')+'" data-dim="'+d[0]+'">'+d[1]+'</button>').join('');
+ document.querySelectorAll('#dwtabs .dwtab').forEach(t=>t.onclick=()=>{document.querySelectorAll('#dwtabs .dwtab').forEach(x=>x.classList.remove('on'));t.classList.add('on');renderCDrawer(t.dataset.dim,rows);});
+ renderCDrawer(cfg.dims[0][0],rows);
+}
+function renderCDrawer(dim,rows){
+ const g=cGroup(rows,dim);let keys=Object.keys(g);
+ keys.sort(dim==='wk'?((a,b)=>a<b?-1:1):((a,b)=>g[b].n-g[a].n));
+ const drc=v=>v==null?'':v>=70?'t-g':v>=50?'t-a':'t-r',rtc=v=>v==null?'':v<=20?'t-g':v<=30?'t-a':'t-r';
+ const inrL=v=>v>=100000?'₹'+(v/100000).toFixed(2)+'L':'₹'+Math.round(v).toLocaleString('en-IN');
+ const head='<thead><tr><th class="l">'+dim.toUpperCase()+'</th><th>Ord</th><th>Deliv%</th><th>RTO%</th><th>GMV</th></tr></thead>';
+ const body=keys.map(k=>{const e=g[k];const dr=pct(e.d,e.conc),rt=pct(e.r,e.conc);return '<tr><td class="l">'+k+'</td><td>'+e.n+'</td><td class="'+drc(dr)+'">'+(dr==null?'—':dr+'%')+'</td><td class="'+rtc(rt)+'">'+(rt==null?'—':rt+'%')+'</td><td>'+inrL(e.gmv)+'</td></tr>';}).join('');
+ document.getElementById('dwtable').innerHTML=head+'<tbody>'+body+'</tbody>';
+ const ck=(dim==='wk')?keys:keys.slice(0,12);const trunc=s=>{s=''+s;return s.length>15?s.slice(0,14)+'…':s;};
+ const labels=ck.map(trunc),dr=ck.map(k=>pct(g[k].d,g[k].conc)||0),rt=ck.map(k=>pct(g[k].r,g[k].conc)||0),vol=ck.map(k=>g[k].n);
+ if(cdwChart)cdwChart.destroy();
+ if(HASCHART)cdwChart=new Chart(document.getElementById('dwchart'),{data:{labels,datasets:[
+   {type:'bar',label:'Orders',data:vol,yAxisID:'y1',backgroundColor:'rgba(63,114,190,.25)',borderColor:C.blue,borderWidth:1.4,borderRadius:3,order:3},
+   {type:'line',label:'Deliv%',data:dr,yAxisID:'y',borderColor:C.greenD,borderWidth:2.3,pointRadius:3,tension:.15,order:1},
+   {type:'line',label:'RTO%',data:rt,yAxisID:'y',borderColor:C.redD,borderWidth:2.3,pointRadius:3,tension:.15,order:2}]},
+   options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{font:{size:9},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{font:{size:8},maxRotation:55}},y:{min:0,max:104,grid:gridCfg,ticks:{callback:v=>v+'%',font:{size:9}}},y1:{position:'right',beginAtZero:true,grid:{display:false},ticks:{font:{size:9}}}}}});
+}
+function closeCDrawer(){document.getElementById('dwbk').classList.remove('show');document.getElementById('drawer').classList.remove('show');}
+document.getElementById('kpis').addEventListener('click',function(e){const c=e.target.closest('.cdrill');if(c&&c.dataset.cdrill)openCDrawer(c.dataset.cdrill);});
+document.querySelectorAll('.chartcard.cdrill').forEach(c=>c.addEventListener('click',()=>openCDrawer(c.dataset.cdrill)));
+document.getElementById('dwx').addEventListener('click',closeCDrawer);
+document.getElementById('dwbk').addEventListener('click',closeCDrawer);
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeCDrawer();});
+(function(){var cm=document.getElementById('cmini');if(cm)cm.innerHTML='<span class="t">'+(M.store||'All Brands')+' // Courier</span><span class="s">'+(M.total||0).toLocaleString('en-IN')+' orders</span>';})();
 
 })();
 </script>
