@@ -546,12 +546,18 @@ const CDRILL={
  breach:{title:'EDD breach',dims:[['co','By courier'],['zone','By zone']]},
  freight:{title:'Freight & shipping',dims:[['co','By courier'],['zone','By zone'],['pr','By product']]}
 };
-let cdwChart;
+let cdwChart,curCDrill;
 function cWeek(di){const d=di2d(di);const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);return di2iso(d2di(d));}
 function cKey(o,dim){switch(dim){case 'co':return CO[o[CI]];case 'pr':return PR[o[PI]];case 'zone':return ZO[o[ZI]];case 'ti':return TZ[o[TI]];case 'pay':return o[PAY]===1?'COD':o[PAY]===0?'Prepaid':'Other';case 're':return o[RE]>=0?RS[o[RE]]:'—';case 'wk':return cWeek(o[DT]);default:return '—';}}
-function cGroup(rows,dim){const g={};for(const o of rows){const k=cKey(o,dim);const e=g[k]||(g[k]={n:0,d:0,r:0,conc:0,gmv:0});e.n++;e.gmv+=o[TT];if(o[ST]==0){e.d++;e.conc++;}else if(o[ST]==1){e.r++;e.conc++;}}return g;}
+function cGroup(rows,dim){const g={};for(const o of rows){const k=cKey(o,dim);const e=g[k]||(g[k]={n:0,d:0,r:0,conc:0,gmv:0,tr:[],brN:0,brD:0,frSum:0,frN:0,exEst:0});
+  e.n++;e.gmv+=o[TT];
+  if(o[ST]==0){e.d++;e.conc++;if(o[TR]>=0)e.tr.push(o[TR]);}else if(o[ST]==1){e.r++;e.conc++;}
+  if(o[BR]>=0){e.brD++;if(o[BR]==1)e.brN++;}
+  if(o[FR]>0){e.frSum+=o[FR];e.frN++;}
+  if(o[BW]>0){const ew=Math.max(0,o[EW]),vw=Math.max(0,o[VW]),bw=o[BW];const ex=Math.max(0,bw-Math.max(ew,vw));if(o[FWD]>0)e.exEst+=o[FWD]*ex/bw;}
+ }return g;}
 function openCDrawer(drill){
- const cfg=CDRILL[drill];if(!cfg)return;
+ const cfg=CDRILL[drill];if(!cfg)return;curCDrill=drill;
  document.getElementById('dwttl').textContent=cfg.title;
  document.getElementById('dwbk').classList.add('show');document.getElementById('drawer').classList.add('show');
  const rows=ORD.filter(o=>o[DT]>=curLo&&o[DT]<=curHi);
@@ -562,23 +568,45 @@ function openCDrawer(drill){
 }
 function renderCDrawer(dim,rows){
  const g=cGroup(rows,dim);let keys=Object.keys(g);
- keys.sort(dim==='wk'?((a,b)=>a<b?-1:1):((a,b)=>g[b].n-g[a].n));
- const drc=v=>v==null?'':v>=70?'t-g':v>=50?'t-a':'t-r',rtc=v=>v==null?'':v<=20?'t-g':v<=30?'t-a':'t-r';
- const inrL=v=>v>=100000?'₹'+(v/100000).toFixed(2)+'L':'₹'+Math.round(v).toLocaleString('en-IN');
- const head='<thead><tr><th class="l">'+dim.toUpperCase()+'</th><th>Ord</th><th>Deliv%</th><th>RTO%</th><th>GMV</th></tr></thead>';
- const body=keys.map(k=>{const e=g[k];const dr=pct(e.d,e.conc),rt=pct(e.r,e.conc);return '<tr><td class="l">'+k+'</td><td>'+e.n+'</td><td class="'+drc(dr)+'">'+(dr==null?'—':dr+'%')+'</td><td class="'+rtc(rt)+'">'+(rt==null?'—':rt+'%')+'</td><td>'+inrL(e.gmv)+'</td></tr>';}).join('');
+ const drc=v=>v==null?'':v>=70?'t-g':v>=50?'t-a':'t-r',rtc=v=>v==null?'':v<=20?'t-g':v<=30?'t-a':'t-r',
+       spc=v=>v==null?'':v<=4?'t-g':v<=8?'t-a':'t-r',brc=v=>v==null?'':v<=5?'t-g':v<=12?'t-a':'t-r';
+ const inrL=v=>(v==null)?'—':(v>=100000?'₹'+(v/100000).toFixed(2)+'L':'₹'+Math.round(v).toLocaleString('en-IN'));
+ const dr=e=>pct(e.d,e.conc),rt=e=>pct(e.r,e.conc),sp=e=>med(e.tr),br=e=>pct(e.brN,e.brD),avgf=e=>e.frN?Math.round(e.frSum/e.frN):null;
+ // metric-specific columns + chart series per drill
+ let cols, sortVal, chartLabel, chartVal, chartColor, pctAxis=true;
+ if(curCDrill==='speed'){
+   cols=[['Ord',e=>e.n,''],['Med p→d',e=>{const m=sp(e);return m==null?'—':m+'d';},e=>spc(sp(e))],['Deliv%',e=>{const v=dr(e);return v==null?'—':v+'%';},e=>drc(dr(e))]];
+   sortVal=e=>e.n; chartLabel='Median p→d (days)'; chartVal=e=>sp(e)||0; chartColor=C.blue; pctAxis=false;
+ } else if(curCDrill==='breach'){
+   cols=[['Ord',e=>e.n,''],['Breach%',e=>{const v=br(e);return v==null?'—':v+'%';},e=>brc(br(e))],['Deliv%',e=>{const v=dr(e);return v==null?'—':v+'%';},e=>drc(dr(e))]];
+   sortVal=e=>e.n; chartLabel='EDD breach %'; chartVal=e=>br(e)||0; chartColor=C.redD;
+ } else if(curCDrill==='freight'){
+   cols=[['Ord',e=>e.n,''],['Avg frt',e=>inrL(avgf(e)),''],['Total frt',e=>inrL(e.frSum),''],['Recoverable',e=>inrL(e.exEst),e=>e.exEst>0?'t-r':'']];
+   sortVal=e=>e.frSum; chartLabel='Avg freight / order (₹)'; chartVal=e=>avgf(e)||0; chartColor=C.amberD; pctAxis=false;
+ } else {
+   cols=[['Ord',e=>e.n,''],['Deliv%',e=>{const v=dr(e);return v==null?'—':v+'%';},e=>drc(dr(e))],['RTO%',e=>{const v=rt(e);return v==null?'—':v+'%';},e=>rtc(rt(e))],['GMV',e=>inrL(e.gmv),'']];
+   sortVal=e=>e.n; chartLabel=null;
+ }
+ keys.sort(dim==='wk'?((a,b)=>a<b?-1:1):((a,b)=>sortVal(g[b])-sortVal(g[a])));
+ const head='<thead><tr><th class="l">'+dim.toUpperCase()+'</th>'+cols.map(c=>'<th>'+c[0]+'</th>').join('')+'</tr></thead>';
+ const body=keys.map(k=>{const e=g[k];return '<tr><td class="l">'+k+'</td>'+cols.map(c=>{const cls=(typeof c[2]==='function')?c[2](e):(c[2]||'');return '<td class="'+cls+'">'+c[1](e)+'</td>';}).join('')+'</tr>';}).join('');
  document.getElementById('dwtable').innerHTML=head+'<tbody>'+body+'</tbody>';
  var dimMap={co:'co',pay:'pay',zone:'zone',ti:'tier',re:'reason',wk:'week',pr:'co'};
  var sb=(M.store&&M.store!=='All Brands')?('&brand='+encodeURIComponent(M.store)):'';
  document.getElementById('dwopen').href='scratchpad.html?scope=brand'+sb+'&dim='+(dimMap[dim]||'co');
  const ck=(dim==='wk')?keys:keys.slice(0,12);const trunc=s=>{s=''+s;return s.length>15?s.slice(0,14)+'…':s;};
- const labels=ck.map(trunc),dr=ck.map(k=>pct(g[k].d,g[k].conc)||0),rt=ck.map(k=>pct(g[k].r,g[k].conc)||0),vol=ck.map(k=>g[k].n);
- if(cdwChart)cdwChart.destroy();
- if(HASCHART)cdwChart=new Chart(document.getElementById('dwchart'),{data:{labels,datasets:[
+ const labels=ck.map(trunc),vol=ck.map(k=>g[k].n);
+ let datasets;
+ if(chartLabel){datasets=[
+   {type:'bar',label:'Orders',data:vol,yAxisID:'y1',backgroundColor:'rgba(63,114,190,.25)',borderColor:C.blue,borderWidth:1.4,borderRadius:3,order:2},
+   {type:'line',label:chartLabel,data:ck.map(k=>chartVal(g[k])),yAxisID:'y',borderColor:chartColor,borderWidth:2.3,pointRadius:3,tension:.15,order:1}];
+ } else {datasets=[
    {type:'bar',label:'Orders',data:vol,yAxisID:'y1',backgroundColor:'rgba(63,114,190,.25)',borderColor:C.blue,borderWidth:1.4,borderRadius:3,order:3},
-   {type:'line',label:'Deliv%',data:dr,yAxisID:'y',borderColor:C.greenD,borderWidth:2.3,pointRadius:3,tension:.15,order:1},
-   {type:'line',label:'RTO%',data:rt,yAxisID:'y',borderColor:C.redD,borderWidth:2.3,pointRadius:3,tension:.15,order:2}]},
-   options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{font:{size:9},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{font:{size:8},maxRotation:55}},y:{min:0,max:104,grid:gridCfg,ticks:{callback:v=>v+'%',font:{size:9}}},y1:{position:'right',beginAtZero:true,grid:{display:false},ticks:{font:{size:9}}}}}});
+   {type:'line',label:'Deliv%',data:ck.map(k=>dr(g[k])||0),yAxisID:'y',borderColor:C.greenD,borderWidth:2.3,pointRadius:3,tension:.15,order:1},
+   {type:'line',label:'RTO%',data:ck.map(k=>rt(g[k])||0),yAxisID:'y',borderColor:C.redD,borderWidth:2.3,pointRadius:3,tension:.15,order:2}];}
+ if(cdwChart)cdwChart.destroy();
+ if(HASCHART)cdwChart=new Chart(document.getElementById('dwchart'),{data:{labels,datasets},
+   options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{font:{size:9},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{font:{size:8},maxRotation:55}},y:{min:0,max:pctAxis?104:undefined,grid:gridCfg,ticks:{callback:v=>pctAxis?v+'%':v,font:{size:9}}},y1:{position:'right',beginAtZero:true,grid:{display:false},ticks:{font:{size:9}}}}}});
 }
 function closeCDrawer(){document.getElementById('dwbk').classList.remove('show');document.getElementById('drawer').classList.remove('show');}
 document.getElementById('kpis').addEventListener('click',function(e){const c=e.target.closest('.cdrill');if(c&&c.dataset.cdrill)openCDrawer(c.dataset.cdrill);});
