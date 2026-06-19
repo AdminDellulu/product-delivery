@@ -194,9 +194,9 @@ body{padding-left:78px}
 .filterbar.scrolled .frow1 label{font-size:9px}
 .filterbar.scrolled .brandbar .bchip{font-size:10px;padding:4px 9px}
 .filterbar.scrolled .frow1 .frange{font-size:10px;padding:3px 8px}
-.dwbk{position:fixed;inset:0;background:rgba(43,43,40,.45);z-index:200;display:none}.dwbk.show{display:block}
-.drawer{position:fixed;top:50%;left:50%;transform:translate(-50%,-48%);width:min(760px,94vw);max-height:88vh;background:var(--paper);border:2px solid var(--line);box-shadow:8px 8px 0 var(--shadow);border-radius:var(--radius);z-index:201;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;display:flex;flex-direction:column;overflow:hidden}
-.drawer.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+.dwbk{position:fixed;inset:0;background:rgba(43,43,40,.45);z-index:200;display:none;align-items:center;justify-content:center;padding:24px}.dwbk.show{display:flex}
+.drawer{position:relative;width:min(760px,94vw);max-height:88vh;background:var(--paper);border:2px solid var(--line);box-shadow:8px 8px 0 var(--shadow);border-radius:var(--radius);z-index:201;opacity:0;transform:translateY(10px);transition:opacity .14s ease,transform .14s ease;display:flex;flex-direction:column;overflow:hidden}
+.dwbk.show .drawer{opacity:1;transform:none}
 .dwfoot{padding:11px 18px;border-top:2px solid var(--line);background:var(--card)}
 .dwfoot a{display:inline-flex;align-items:center;gap:7px;font-family:'Space Grotesk';font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#fff;background:var(--blue);border:2px solid #4f4470;text-decoration:none;padding:9px 14px;border-radius:var(--radius)}
 .dwhead{background:var(--ink);color:var(--paper);padding:16px 18px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
@@ -216,12 +216,13 @@ table.dwt td.l{text-align:left;font-family:'Space Grotesk';font-weight:700}
 </style>
 </head>
 <body>
-<div class="dwbk" id="dwbk"></div>
+<div class="dwbk" id="dwbk">
 <div class="drawer" id="drawer">
   <div class="dwhead"><div><h3 id="dwttl">—</h3><div class="dwsub" id="dwsub"></div></div><button class="dwx" id="dwx" aria-label="Close">×</button></div>
   <div class="dwtabs" id="dwtabs"></div>
   <div class="dwbody"><div class="dwchart"><canvas id="dwchart"></canvas></div><table class="dwt" id="dwtable"></table></div>
   <div class="dwfoot"><a id="dwopen" target="_blank" rel="noopener">Open in scratch pad ↗</a></div>
+</div>
 </div>
 
 <div class="snav" id="snav">
@@ -612,7 +613,7 @@ function closeCDrawer(){document.getElementById('dwbk').classList.remove('show')
 document.getElementById('kpis').addEventListener('click',function(e){const c=e.target.closest('.cdrill');if(c&&c.dataset.cdrill)openCDrawer(c.dataset.cdrill);});
 document.querySelectorAll('.chartcard.cdrill').forEach(c=>c.addEventListener('click',()=>openCDrawer(c.dataset.cdrill)));
 document.getElementById('dwx').addEventListener('click',closeCDrawer);
-document.getElementById('dwbk').addEventListener('click',closeCDrawer);
+document.getElementById('dwbk').addEventListener('click',function(e){if(e.target===document.getElementById('dwbk'))closeCDrawer();});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeCDrawer();});
 
 })();
