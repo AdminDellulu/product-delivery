@@ -187,12 +187,18 @@ body{padding-left:78px}
 .card.cdrill:hover,.chartcard.cdrill:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--shadow)}
 .drillhint{font-size:8.5px;color:var(--blue);font-weight:700;letter-spacing:.3px}
 .cmini{display:none}
-.filterbar.scrolled .cmini{display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--paper);border:2px solid var(--line);border-radius:var(--radius);padding:7px 14px;margin-bottom:9px;box-shadow:3px 3px 0 var(--shadow)}
-.cmini .t{font-family:'Space Grotesk';font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.3px}
-.cmini .s{font-size:10.5px;color:var(--amber)}
+.filterbar.scrolled .cmini{display:flex;align-items:center;gap:7px;flex-wrap:wrap;background:var(--ink);color:var(--paper);border:2px solid var(--line);border-radius:var(--radius);padding:8px 14px;margin-bottom:9px;box-shadow:3px 3px 0 var(--shadow)}
+.cmini .tag{font-size:10.5px;padding:4px 9px}
+.filterbar.scrolled .frow1 input[type=date]{font-size:11px;padding:3px 5px}
+.filterbar.scrolled .frow1 .preset{font-size:10px;padding:4px 8px}
+.filterbar.scrolled .frow1 label{font-size:9px}
+.filterbar.scrolled .brandbar .bchip{font-size:10px;padding:4px 9px}
+.filterbar.scrolled .frow1 .frange{font-size:10px;padding:3px 8px}
 .dwbk{position:fixed;inset:0;background:rgba(43,43,40,.45);z-index:200;display:none}.dwbk.show{display:block}
-.drawer{position:fixed;top:0;right:0;bottom:0;width:min(580px,94vw);background:var(--paper);border-left:2px solid var(--line);box-shadow:-8px 0 0 var(--shadow);z-index:201;transform:translateX(100%);transition:transform .18s ease;display:flex;flex-direction:column;overflow:hidden}
-.drawer.show{transform:translateX(0)}
+.drawer{position:fixed;top:50%;left:50%;transform:translate(-50%,-48%);width:min(760px,94vw);max-height:88vh;background:var(--paper);border:2px solid var(--line);box-shadow:8px 8px 0 var(--shadow);border-radius:var(--radius);z-index:201;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;display:flex;flex-direction:column;overflow:hidden}
+.drawer.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+.dwfoot{padding:11px 18px;border-top:2px solid var(--line);background:var(--card)}
+.dwfoot a{display:inline-flex;align-items:center;gap:7px;font-family:'Space Grotesk';font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#fff;background:var(--blue);border:2px solid #4f4470;text-decoration:none;padding:9px 14px;border-radius:var(--radius)}
 .dwhead{background:var(--ink);color:var(--paper);padding:16px 18px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .dwhead h3{font-size:16px;text-transform:uppercase;letter-spacing:.3px;line-height:1}
 .dwhead .dwsub{font-size:10.5px;color:var(--amber);margin-top:6px}
@@ -215,6 +221,7 @@ table.dwt td.l{text-align:left;font-family:'Space Grotesk';font-weight:700}
   <div class="dwhead"><div><h3 id="dwttl">—</h3><div class="dwsub" id="dwsub"></div></div><button class="dwx" id="dwx" aria-label="Close">×</button></div>
   <div class="dwtabs" id="dwtabs"></div>
   <div class="dwbody"><div class="dwchart"><canvas id="dwchart"></canvas></div><table class="dwt" id="dwtable"></table></div>
+  <div class="dwfoot"><a id="dwopen" target="_blank" rel="noopener">Open in scratch pad ↗</a></div>
 </div>
 
 <div class="snav" id="snav">
@@ -394,7 +401,9 @@ function render(lo,hi){
  const ov=metrics(rows),bc=byCourier(rows);
  const [plo,phi]=priorWindow(lo,hi);const prev=metrics(ORD.filter(o=>o[DT]>=plo&&o[DT]<=phi));
  document.getElementById('frange').textContent=rows.length.toLocaleString('en-IN')+' ORDERS · '+human(lo)+' → '+human(hi);
- document.getElementById('tagrow').innerHTML=`<span class="tag solid">${human(lo)}–${human(hi)}</span><span class="tag g">Delivery ${fmt(ov.dr,'%')}</span><span class="tag r">RTO ${fmt(ov.rto,'%')}</span><span class="tag">COD ${fmt(ov.codpct,'%')}</span><span class="tag p">${bc.length} couriers</span>`;
+ const tagsHTML=`<span class="tag solid">${human(lo)}–${human(hi)}</span><span class="tag g">Delivery ${fmt(ov.dr,'%')}</span><span class="tag r">RTO ${fmt(ov.rto,'%')}</span><span class="tag">COD ${fmt(ov.codpct,'%')}</span><span class="tag p">${bc.length} couriers</span>`;
+ document.getElementById('tagrow').innerHTML=tagsHTML;
+ var _cm=document.getElementById('cmini');if(_cm)_cm.innerHTML=tagsHTML;
  // maturity banner
  const matpct=rows.length?Math.round(1000*ov.matured/rows.length)/10:100;
  const mcls=matpct>=90?'mg':(matpct>=70?'ma':'mr');const mp=matpct>=90?'mg2':(matpct>=70?'ma2':'mr2');
@@ -431,7 +440,7 @@ function render(lo,hi){
  renderProducts(bc,rows.length,T);
  renderPincodes(rows);
  document.getElementById('foot').innerHTML=`<b>SOURCE.</b> ITL "All orders" export · ${M.rows.toLocaleString('en-IN')} line-rows → ${M.total.toLocaleString('en-IN')} unique orders · ${human(M.dmin)}–${human(M.dmax)} · generated ${M.generated}. &nbsp; <b>DEFS.</b> Delivery rate=Delivered÷(Delivered+RTO); median speed=pickup→delivery; EDD breach=delivered after promised date; chargeable weight=max(dead,volumetric); overbilling=billed−chargeable; est recoverable=FWD×excess÷billed; Wilson LB at z=1.64 (95% one-sided). &nbsp; <b>CAVEATS.</b> Carriers &lt;50 orders directional; ~25% of rows lack a zone tag; product cards count each order under its primary line item; weight/freight on shipped (billed) orders only. Store: SnugLlama.`;
- document.querySelectorAll('.preset').forEach(p=>p.classList.toggle('on',(p.dataset.d==='all'&&lo===M.dmin&&hi===M.dmax)));
+ document.querySelectorAll('.preset').forEach(p=>{let on;const dd=p.dataset.d;if(dd==='all'){on=(lo===M.dmin&&hi===M.dmax);}else{const x=di2d(M.dmax);x.setDate(x.getDate()-(+dd)+1);on=(lo===d2di(x)&&hi===M.dmax);}p.classList.toggle('on',on);});
 }
 function pcell(label,val,cls,meterPct,meterCol){return `<div class="pc ${cls?'f-'+cls:''}"><div class="l">${label}</div><div class="v">${val}</div>${meterPct!=null?`<div class="drcellbar"><i style="width:${Math.max(0,Math.min(100,meterPct))}%;background:${meterCol}"></i></div>`:''}</div>`;}
 function prodDetail(pr){
@@ -559,6 +568,9 @@ function renderCDrawer(dim,rows){
  const head='<thead><tr><th class="l">'+dim.toUpperCase()+'</th><th>Ord</th><th>Deliv%</th><th>RTO%</th><th>GMV</th></tr></thead>';
  const body=keys.map(k=>{const e=g[k];const dr=pct(e.d,e.conc),rt=pct(e.r,e.conc);return '<tr><td class="l">'+k+'</td><td>'+e.n+'</td><td class="'+drc(dr)+'">'+(dr==null?'—':dr+'%')+'</td><td class="'+rtc(rt)+'">'+(rt==null?'—':rt+'%')+'</td><td>'+inrL(e.gmv)+'</td></tr>';}).join('');
  document.getElementById('dwtable').innerHTML=head+'<tbody>'+body+'</tbody>';
+ var dimMap={co:'co',pay:'pay',zone:'zone',ti:'tier',re:'reason',wk:'week',pr:'co'};
+ var sb=(M.store&&M.store!=='All Brands')?('&brand='+encodeURIComponent(M.store)):'';
+ document.getElementById('dwopen').href='scratchpad.html?scope=brand'+sb+'&dim='+(dimMap[dim]||'co');
  const ck=(dim==='wk')?keys:keys.slice(0,12);const trunc=s=>{s=''+s;return s.length>15?s.slice(0,14)+'…':s;};
  const labels=ck.map(trunc),dr=ck.map(k=>pct(g[k].d,g[k].conc)||0),rt=ck.map(k=>pct(g[k].r,g[k].conc)||0),vol=ck.map(k=>g[k].n);
  if(cdwChart)cdwChart.destroy();
@@ -574,7 +586,6 @@ document.querySelectorAll('.chartcard.cdrill').forEach(c=>c.addEventListener('cl
 document.getElementById('dwx').addEventListener('click',closeCDrawer);
 document.getElementById('dwbk').addEventListener('click',closeCDrawer);
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeCDrawer();});
-(function(){var cm=document.getElementById('cmini');if(cm)cm.innerHTML='<span class="t">'+(M.store||'All Brands')+' // Courier</span><span class="s">'+(M.total||0).toLocaleString('en-IN')+' orders</span>';})();
 
 })();
 </script>

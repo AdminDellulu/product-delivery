@@ -162,8 +162,8 @@
 .drillhint{font-size:8.5px;color:var(--blue);font-weight:700;letter-spacing:.3px}
 .dwbk{position:fixed;inset:0;background:rgba(28,27,25,.45);z-index:200;display:none}
 .dwbk.show{display:block}
-.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,94vw);background:var(--paper);border-left:2px solid var(--line);box-shadow:-8px 0 0 var(--shadow);z-index:201;transform:translateX(100%);transition:transform .18s ease;display:flex;flex-direction:column;overflow:hidden}
-.drawer.show{transform:translateX(0)}
+.drawer{position:fixed;top:50%;left:50%;transform:translate(-50%,-48%);width:min(760px,94vw);max-height:88vh;background:var(--paper);border:2px solid var(--line);box-shadow:8px 8px 0 var(--shadow);border-radius:var(--radius);z-index:201;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;display:flex;flex-direction:column;overflow:hidden}
+.drawer.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
 .dwhead{background:var(--ink);color:var(--paper);padding:16px 18px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .dwhead h3{font-size:16px;text-transform:uppercase;letter-spacing:.3px;line-height:1}
 .dwhead .dwsub{font-size:10.5px;color:var(--amber);margin-top:6px}

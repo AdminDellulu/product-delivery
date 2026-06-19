@@ -108,18 +108,23 @@ const drC=v=>v==null?'':v>=70?'tg':v>=50?'ta':'tr';
 const rtoC=v=>v==null?'':v<=20?'tg':v<=33?'ta':'tr';
 function med(a){if(!a.length)return null;a=a.slice().sort((x,y)=>x-y);const m=a.length>>1;return a.length%2?a[m]:(a[m-1]+a[m])/2;}
 
+const SCOPE=QS.get('scope'); // 'brand' = whole-brand explorer (from courier)
 async function load(){
-  if(!PRODUCT){document.getElementById('sub').textContent='No product specified.';return;}
+  const brandMode = !PRODUCT || SCOPE==='brand';
+  const fn = brandMode ? 'get_brand_orders' : 'get_product_orders';
+  const body = brandMode ? {p_brand: BRAND0||null} : {p_product:PRODUCT,p_brand:null};
   try{
-    const res=await fetch(SUPA_URL+'/rest/v1/rpc/get_product_orders',{method:'POST',
+    const res=await fetch(SUPA_URL+'/rest/v1/rpc/'+fn,{method:'POST',
       headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
-      body:JSON.stringify({p_product:PRODUCT,p_brand:null})});
+      body:JSON.stringify(body)});
     if(!res.ok)throw new Error('HTTP '+res.status);
     const D=await res.json(); ROWS=D.rows||[]; META=D.meta||{};
   }catch(e){document.getElementById('sub').textContent='Failed to load: '+e.message;return;}
-  document.getElementById('ttl').textContent=(META.display||PRODUCT)+' · Scratch Pad';
+  document.getElementById('ttl').textContent=(META.display||PRODUCT||'All Brands')+' · Scratch Pad';
   document.getElementById('sub').textContent=META.n+' orders · '+(META.dmin||'')+' → '+(META.dmax||'')+' · '+(META.brands||[]).join(', ');
-  document.getElementById('back').href='product.html?product='+encodeURIComponent(PRODUCT)+(BRAND0?'&brand='+encodeURIComponent(BRAND0):'');
+  const back=document.getElementById('back');
+  if(brandMode){back.textContent='‹ Courier Performance';back.href='courier.html'+(BRAND0?'?brand='+encodeURIComponent(BRAND0):'');}
+  else{back.textContent='‹ Product Performance';back.href='product.html?product='+encodeURIComponent(PRODUCT)+(BRAND0?'&brand='+encodeURIComponent(BRAND0):'');}
   buildFilters(); if(DIM0)document.getElementById('dim').value=DIM0; render();
 }
 function uniq(k){return [...new Set(ROWS.map(r=>r[k]).filter(Boolean))].sort();}
