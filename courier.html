@@ -22,7 +22,13 @@ header.masthead .sub{font-size:11.5px;margin-top:10px;color:var(--amber);letter-
 .tag.g{background:var(--green);color:#fff;border-color:var(--greenD);font-weight:700}
 .tag.r{background:var(--red);color:#fff;border-color:var(--redD);font-weight:700}
 .tag.p{background:var(--purple);color:#fff;border-color:#4f4470;font-weight:700}
-.filterbar{position:sticky;top:0;z-index:40;background:var(--paper);border-bottom:2px solid var(--line);padding:12px 0;margin-top:18px}
+.filterbar{position:sticky;top:0;z-index:40;background:var(--paper);padding:12px 0;margin-top:14px}
+.filterbar.scrolled{box-shadow:0 3px 0 var(--shadow)}
+.filterbar .fin{flex-direction:column;align-items:stretch;gap:9px}
+.frow1,.frow2{display:flex;gap:11px;align-items:center;flex-wrap:wrap}
+.frow1 .frange{margin-left:auto}
+.frow1 .brandbar{max-width:none;margin:0;padding:0;display:flex;gap:7px;align-items:center;flex-wrap:wrap;box-shadow:none}
+.filterbar.scrolled .frow2{display:none}
 .fin{max-width:1280px;margin:0 auto;padding:0 20px;display:flex;gap:11px;align-items:center;flex-wrap:wrap}
 .fin label{font-family:'Space Grotesk';font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;color:var(--grey)}
 .fin input[type=date],.fin input[type=number],.fin select{font-family:'Space Mono',monospace;font-size:12.5px;border:2px solid var(--line);background:#fff;padding:5px 8px;border-radius:4px;box-shadow:2px 2px 0 var(--shadow)}
@@ -192,14 +198,16 @@ body{padding-left:78px}
 <div class="wrap">
 <header class="masthead"><div><h1>Courier //<br>Performance</h1><div class="sub" id="sub">ITL EXPORT · loading…</div></div><div class="tagrow" id="tagrow"></div></header>
 </div>
-<div class="brandbar"><span class="bl">Brand</span><span class="bchip" data-b="">All</span><span class="bchip" data-b="Dellulu">Dellulu</span><span class="bchip" data-b="SnugLlama">SnugLlama</span><span class="bchip" data-b="Flanq">Flanq</span></div>
-
-<div class="filterbar"><div class="fin">
- <label>From</label><input type="date" id="from"><label>To</label><input type="date" id="to">
- <button class="preset" data-d="all">All</button><button class="preset" data-d="90">90D</button><button class="preset" data-d="30">30D</button>
- <span style="width:14px"></span>
- <label>Targets DR≥</label><input type="number" id="tDR" value="85"><label>RTO≤</label><input type="number" id="tRTO" value="15"><label>Breach≤</label><input type="number" id="tBR" value="5"><label>Speed≤</label><input type="number" id="tSP" value="4">
- <span class="frange" id="frange"></span>
+<div class="filterbar" id="cbar"><div class="fin">
+ <div class="frow1">
+  <label>From</label><input type="date" id="from"><label>To</label><input type="date" id="to">
+  <button class="preset" data-d="all">All</button><button class="preset" data-d="90">90D</button><button class="preset" data-d="30">30D</button>
+  <span class="frange" id="frange"></span>
+  <div class="brandbar"><span class="bl">Brand</span><span class="bchip" data-b="">All</span><span class="bchip" data-b="Dellulu">Dellulu</span><span class="bchip" data-b="SnugLlama">SnugLlama</span><span class="bchip" data-b="Flanq">Flanq</span></div>
+ </div>
+ <div class="frow2">
+  <label>Targets DR≥</label><input type="number" id="tDR" value="85"><label>RTO≤</label><input type="number" id="tRTO" value="15"><label>Breach≤</label><input type="number" id="tBR" value="5"><label>Speed≤</label><input type="number" id="tSP" value="4">
+ </div>
 </div></div>
 
 <div class="wrap">
@@ -244,6 +252,8 @@ body{padding-left:78px}
   var s=document.getElementById('snav'),t=document.getElementById('snavToggle');
   if(t)t.addEventListener('click',function(e){e.stopPropagation();s.classList.toggle('open');});
   document.addEventListener('click',function(e){if(s&&s.classList.contains('open')&&!s.contains(e.target))s.classList.remove('open');});
+  var cbar=document.getElementById('cbar');
+  if(cbar){var onScroll=function(){cbar.classList.toggle('scrolled',window.scrollY>150);};window.addEventListener('scroll',onScroll,{passive:true});onScroll();}
 })();
 </script>
 
@@ -410,7 +420,7 @@ function renderProducts(bc,total,T){let shown=0;
    let prods=Object.entries(pg).filter(([pn,pr])=>pr.length>=MINORD);if(PRODFILTER!=='__all__')prods=prods.filter(([pn])=>pn===PRODFILTER);
    prods.sort((a,b)=>b[1].length-a[1].length);if(!prods.length)return '';
    const fRows=PRODFILTER==='__all__'?o.rows:o.rows.filter(r=>PR[r[PI]]===PRODFILTER);if(!fRows.length)return '';
-   const x=metrics(fRows);const share=Math.round(1000*fRows.length/total)/10;const band=ragHi(x.dr,T.dr);
+   const x=metrics(fRows);const share=Math.round(1000*fRows.length/total)/10;const band=drC(x.dr);
    const zs=speedByDim(fRows,ZI,CARDZ);let zc='';CARDZ.forEach(z=>{const v=zs[z];zc+=`<div class="zc f-${spdC(v.m)}"><div class="zk">${z}</div><div class="zv">${v.m==null?'—':v.m}</div><small>${v.n||''}</small></div>`;});
    const tot=x.d+x.r+x.inf+x.canc||1;
    const ob=`<div class="obar"><i style="width:${100*x.d/tot}%;background:${C.green}"></i><i style="width:${100*x.r/tot}%;background:${C.red}"></i><i style="width:${100*x.inf/tot}%;background:${C.blue}"></i><i style="width:${100*x.canc/tot}%;background:${C.grey}"></i></div><div class="obar-leg"><span><i style="background:${C.green}"></i>Dlv ${x.d}</span><span><i style="background:${C.red}"></i>RTO ${x.r}</span><span><i style="background:${C.blue}"></i>Flight ${x.inf}</span><span><i style="background:${C.grey}"></i>Canc ${x.canc}</span></div>`;
@@ -418,7 +428,7 @@ function renderProducts(bc,total,T){let shown=0;
    const st=[['RTO',fmt(x.rto,'%'),x.rto==null?'na':(x.rto<=T.rto?'g':x.rto<=T.rto*1.3?'a':'r')],['Med p→d',x.spd==null?'—':x.spd+'d',spdC(x.spd)],['Breach',fmt(x.brh,'%'),brC(x.brh)],['Avg frt',inr(x.frAvgShipped),''],['NDR rec',fmt(x.ndrRec,'%'),ndC(x.ndrRec)]];
    const score=`<div class="cscore"><div class="csA"><div class="chero"><div class="big t-${band}">${fmt(x.dr,'%')}</div><div class="bl">delivery<br>rate</div></div><div class="meter"><span style="width:${x.dr||0}%;background:${bandCol(band)}"></span></div>${ob}</div><div class="csB">${pm}<div class="statrow">${st.map(s=>`<div class="stat ${s[2]?'f-'+s[2]:''}"><div class="sl">${s[0]}</div><div class="sv">${s[1]}</div></div>`).join('')}</div></div><div class="csC"><div class="zstrip"><div class="zt">Median pickup→delivery by zone (days · n)</div><div class="zcells">${zc}</div></div></div></div>`;
    const dCol=v=>v==='g'?C.green:v==='a'?C.amber:v==='r'?'#E27A6A':'#e7e3d8';
-   const rtoBand=x.rto==null?'na':(x.rto<=T.rto?'g':x.rto<=T.rto*1.3?'a':'r'),codBand=drC(x.drCod);
+   const rtoBand=x.rto==null?'na':(x.rto<=20?'g':x.rto<=30?'a':'r'),codBand=drC(x.drCod);
    const chips=`<span class="csum"><b style="color:${dCol(band)}">DR ${fmt(x.dr,'%')}</b><span style="color:${dCol(rtoBand)}">RTO ${fmt(x.rto,'%')}</span><span>${x.spd==null?'—':x.spd+'d'}</span><span>Brh ${fmt(x.brh,'%')}</span><span style="color:${dCol(codBand)}">COD-DR ${fmt(x.drCod,'%')}</span><span>${inr(x.frAvgShipped)}/o</span></span>`;
    const rowsH=prods.map(([pn,pr])=>{const px=metrics(pr);const zs2=speedByDim(pr,ZI,CARDZ);shown++;
      let zm='';CARDZ.forEach(z=>{const v=zs2[z];zm+=`<i class="f-${spdC(v.m)}" title="Zone ${z}: ${v.m==null?'n/a':v.m+'d'}">${v.m==null?'·':v.m}</i>`;});

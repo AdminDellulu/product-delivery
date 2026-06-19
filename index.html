@@ -105,7 +105,8 @@ table.lg tr:hover td{background:#f3ead0}
 .lgflag{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:9px;padding:2px 7px;border-radius:3px}
 .f-kill{background:var(--red);color:#fff}.f-watch{background:var(--amber);color:var(--ink)}.f-healthy{background:var(--green);color:#fff}.f-new{background:#e7e2d6;color:#6b685f}
 .tg{color:var(--greenD)}.ta{color:var(--amberD)}.tr{color:var(--redD)}
-.pcard{background:var(--card);color:var(--ink)}
+.pcard{background:#F3E7C6;color:var(--ink)}
+.pcard:hover{background:#F0E1B6}
 .pcard h3{color:var(--ink)}
 .pcard .psub{color:#6b685f}
 .pcard .ptop{align-items:center}
@@ -130,16 +131,6 @@ table.lg tr:hover td{background:#f3ead0}
     <div class="tagrow" id="hdrtags"></div>
   </header>
 
-  <div class="slbl"><span class="ix">01 /</span> Portfolio at a glance</div>
-  <div class="ovgrid" id="portfolio"></div>
-
-  <div class="slbl"><span class="ix">02 /</span> The pattern — COD drives RTO</div>
-  <div class="bubblecard"><h3>COD share vs RTO rate · all product lines</h3><div class="cd" id="bubbleDesc">Bubble size = order volume · colour = health flag · hollow = too new to judge.</div><div class="bubblewrap"><canvas id="bubble"></canvas></div></div>
-
-  <div class="slbl"><span class="ix">03 /</span> Product league table — worst returns first</div>
-  <div class="leaguecard openable" id="leagueOpen"><div><h3 style="margin:0 0 3px">Open the league table</h3><div class="cd" style="margin:0">Every product line ranked by RTO · ₹ at risk · health flag.</div></div><span class="openicon" title="Open full table"><svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h6"/></svg></span></div>
-  <div class="modal" id="leagueModal"><div class="modal-box"><button class="modal-x" id="leagueX" aria-label="Close">×</button><h3>Product league table — worst returns first</h3><div class="lgtable"><table class="lg" id="league"></table></div></div></div>
-
   <div id="homesticky">
   <div id="miniBanner"><span class="mt">Product // Performance</span><span class="ml" id="miniLogos"></span></div>
   <div class="controls">
@@ -158,7 +149,18 @@ table.lg tr:hover td{background:#f3ead0}
   <div id="countline"></div>
   <div id="loadmsg">Loading live data from Supabase…</div>
   <div class="grid" id="grid" style="display:none"></div>
-  <footer id="footer">Delivery Performance · Product index · Live feed</footer>
+
+  <div class="slbl">Portfolio at a glance</div>
+  <div class="ovgrid" id="portfolio"></div>
+
+  <div class="slbl">The pattern — COD drives RTO</div>
+  <div class="bubblecard"><h3>COD share vs RTO rate · all product lines</h3><div class="cd" id="bubbleDesc">Bubble size = order volume · colour = health flag · hollow = too new to judge. Click a bubble to open the product.</div><div class="bubblewrap"><canvas id="bubble"></canvas></div></div>
+
+  <div class="slbl">Product league table — worst returns first</div>
+  <div class="leaguecard openable" id="leagueOpen"><div><h3 style="margin:0 0 3px">Open the league table</h3><div class="cd" style="margin:0">Every product line ranked by RTO · ₹ at risk · health flag.</div></div><span class="openicon" title="Open full table"><svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h6"/></svg></span></div>
+  <div class="modal" id="leagueModal"><div class="modal-box"><button class="modal-x" id="leagueX" aria-label="Close">×</button><h3>Product league table — worst returns first</h3><div class="lgtable"><table class="lg" id="league"></table></div></div></div>
+
+  <footer id="footer">Product Performance · Live feed · Dellulu Ops</footer>
 </div>
 
 <script>
@@ -272,7 +274,7 @@ let bubbleChart;
 function buildBubble(cards){
   const col={kill:'#E1502A',watch:'#EBB12E',healthy:'#2C6E5D',new:'#A39C8C'};
   const pts=cards.filter(c=>c.n_orders>0);
-  const data=pts.map(c=>{const f=flag(c);return{x:c.cod_pct,y:c.rto_rate,r:Math.max(4,Math.sqrt(c.n_orders)*0.85),name:(c.display_name||c.product),fl:f.k};});
+  const data=pts.map(c=>{const f=flag(c);return{x:c.cod_pct,y:c.rto_rate,r:Math.max(4,Math.sqrt(c.n_orders)*0.85),name:(c.display_name||c.product),pk:c.product,fl:f.k};});
   const bg=data.map(d=>d.fl==='new'?'rgba(163,156,140,.18)':col[d.fl]+'cc');
   const bd=data.map(d=>col[d.fl]);
   const m=pts.filter(c=>flag(c).k!=='new'&&c.n_orders>=20);let line=[],rtxt='';
@@ -283,7 +285,10 @@ function buildBubble(cards){
   bubbleChart=new Chart(document.getElementById('bubble'),{data:{datasets:[
     {type:'bubble',data:data,backgroundColor:bg,borderColor:bd,borderWidth:1.5},
     {type:'line',data:line,borderColor:'#B83C18',borderWidth:2,borderDash:[6,5],pointRadius:0,fill:false}]},
-    options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw&&c.raw.name?c.raw.name+': COD '+c.raw.x+'% · RTO '+c.raw.y+'%':''}}},scales:{x:{title:{display:true,text:'COD share of orders (%)'},min:xmin,max:100,ticks:{stepSize:10},grid:{color:'rgba(28,27,25,.08)'}},y:{title:{display:true,text:'RTO rate (%)'},min:0,grid:{color:'rgba(28,27,25,.08)'}}}}});
+    options:{responsive:true,maintainAspectRatio:false,animation:false,
+    onClick:(evt,els)=>{if(els&&els.length){const el=els.find(e=>e.datasetIndex===0);if(el){const d=data[el.index];if(d&&d.pk)location.href='product.html?product='+encodeURIComponent(d.pk)+(activeBrand!=='All'?'&brand='+encodeURIComponent(activeBrand):'');}}},
+    onHover:(evt,els)=>{if(evt.native&&evt.native.target)evt.native.target.style.cursor=(els&&els.some(e=>e.datasetIndex===0))?'pointer':'default';},
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw&&c.raw.name?c.raw.name+': COD '+c.raw.x+'% · RTO '+c.raw.y+'%':''}}},scales:{x:{title:{display:true,text:'COD share of orders (%)'},min:xmin,max:100,ticks:{stepSize:10},grid:{color:'rgba(28,27,25,.08)'}},y:{title:{display:true,text:'RTO rate (%)'},min:0,grid:{color:'rgba(28,27,25,.08)'}}}}});
 }
 function buildLeague(cards){
   const rows=cards.slice().sort((a,b)=>b.rto_rate-a.rto_rate);
