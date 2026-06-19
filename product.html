@@ -175,8 +175,9 @@
 .dwtab.on{background:var(--ink);color:var(--paper)}
 .dwbody{padding:14px 18px;overflow:auto;flex:1}
 .dwchart{position:relative;height:210px;margin-bottom:14px}
-.dwfoot{padding:12px 18px;border-top:2px solid var(--line);background:var(--card)}
-.dwfoot a{display:inline-flex;align-items:center;gap:7px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#fff;background:var(--blue);border:2px solid #4f4470;text-decoration:none;padding:9px 14px;border-radius:var(--radius)}
+.dwactions{display:flex;align-items:center;gap:10px}
+.dwsp{display:inline-flex;align-items:center;gap:6px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;color:var(--ink);background:var(--amber);border:1.5px solid var(--amberD);border-radius:5px;padding:6px 10px;text-decoration:none;white-space:nowrap}
+.dwsp svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
 table.dwt{width:100%;border-collapse:collapse;font-size:11.5px}
 table.dwt th{background:var(--ink);color:var(--paper);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;padding:6px 8px;text-align:right}
 table.dwt th.l{text-align:left}
@@ -186,10 +187,9 @@ table.dwt td.l{text-align:left;font-family:'Space Grotesk',sans-serif;font-weigh
 </style></head><body>
 <div class="dwbk" id="dwbk">
 <div class="drawer" id="drawer">
-  <div class="dwhead"><div><h3 id="dwttl">—</h3><div class="dwsub" id="dwsub"></div></div><button class="dwx" id="dwx" aria-label="Close">×</button></div>
+  <div class="dwhead"><div><h3 id="dwttl">—</h3><div class="dwsub" id="dwsub"></div></div><div class="dwactions"><a id="dwopen" class="dwsp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h6"/></svg>Scratch pad</a><button class="dwx" id="dwx" aria-label="Close">×</button></div></div>
   <div class="dwtabs" id="dwtabs"></div>
   <div class="dwbody"><div class="dwchart"><canvas id="dwchart"></canvas></div><table class="dwt" id="dwtable"></table></div>
-  <div class="dwfoot"><a id="dwopen" target="_blank" rel="noopener">Open in scratch pad ↗</a></div>
 </div>
 </div>
 <div class="wrap">

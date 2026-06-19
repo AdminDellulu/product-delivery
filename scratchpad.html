@@ -21,6 +21,7 @@ header.mast a.back{font-family:'Space Grotesk';font-weight:700;font-size:11px;te
 .fin{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
 .fin label{font-family:'Space Grotesk';font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;color:var(--grey)}
 .fin select,.fin input[type=date]{font-family:'Space Mono',monospace;font-size:12px;border:2px solid var(--line);background:#fff;padding:5px 7px;border-radius:4px;box-shadow:2px 2px 0 var(--shadow)}
+.fin .drgrp{display:inline-flex;align-items:center;gap:9px;white-space:nowrap}
 .fin .reset{font-family:'Space Grotesk';font-weight:700;font-size:10.5px;text-transform:uppercase;border:2px solid var(--line);background:var(--card);padding:6px 11px;cursor:pointer;border-radius:4px;box-shadow:2px 2px 0 var(--shadow)}
 .fin .reset:hover{background:#efe0bd}
 .fin .csv{margin-left:auto;font-family:'Space Grotesk';font-weight:700;font-size:10.5px;text-transform:uppercase;border:2px solid var(--greenD);background:var(--green);color:#fff;padding:6px 12px;cursor:pointer;border-radius:4px;box-shadow:2px 2px 0 var(--shadow)}
@@ -71,7 +72,7 @@ table.t tr:hover td{background:#f3ead0}
   <label>Zone</label><select id="fZone"><option value="">All</option></select>
   <label>Tier</label><select id="fTier"><option value="">All</option><option>T1</option><option>T2</option><option>T3</option></select>
   <label>Status</label><select id="fStatus"><option value="">All</option><option>Delivered</option><option>RTO</option><option>In-flight</option><option>Cancelled</option></select>
-  <label>From</label><input type="date" id="fFrom"><label>To</label><input type="date" id="fTo">
+  <span class="drgrp"><label>From</label><input type="date" id="fFrom"><label>To</label><input type="date" id="fTo"></span>
   <button class="reset" id="reset">Reset</button>
   <button class="csv" id="csv">Export CSV</button>
 </div></div></div>
