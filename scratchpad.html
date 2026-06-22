@@ -102,6 +102,8 @@ const SUPA_URL='https://amnqeynggnwqktvepulv.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbnFleW5nZ253cWt0dmVwdWx2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjY5OTUsImV4cCI6MjA5MDIwMjk5NX0.7YNuC6ihcaM8Ow31rnp-9IYdIlXiAVzMMU2bBzc-IDk';
 const QS=new URLSearchParams(location.search);
 const PRODUCT=QS.get('product')||'', BRAND0=QS.get('brand')||'', DIM0=QS.get('dim')||'';
+// Pre-applied filter context (deep-link the exact slice a card was showing)
+const F0={co:QS.get('co')||'',pay:QS.get('pay')||'',zone:QS.get('zone')||'',tier:QS.get('tier')||'',status:QS.get('status')||'',from:QS.get('from')||'',to:QS.get('to')||''};
 const C={green:'#2C6E5D',greenD:'#1E5446',red:'#E1502A',redD:'#B83C18',amber:'#EBB12E',blue:'#6B5DA6',grey:'#A39C8C',ink:'#1C1B19'};
 let ROWS=[], META={}, chart, brandFilter='';
 const pct=(n,d)=>d?Math.round(1000*n/d)/10:null;
@@ -137,6 +139,9 @@ function buildFilters(){
   document.querySelectorAll('#brandchips .bchip').forEach(c=>c.onclick=()=>{brandFilter=c.dataset.b;document.querySelectorAll('#brandchips .bchip').forEach(x=>x.classList.toggle('on',x.dataset.b===brandFilter));render();});
   const co=document.getElementById('fCo'); uniq('co').forEach(v=>co.add(new Option(v,v)));
   const z=document.getElementById('fZone'); uniq('zone').forEach(v=>z.add(new Option(v,v)));
+  // pre-select filters carried in the URL so the scratchpad opens on the card's exact slice
+  const fset={fCo:F0.co,fPay:F0.pay,fZone:F0.zone,fTier:F0.tier,fStatus:F0.status,fFrom:F0.from,fTo:F0.to};
+  Object.keys(fset).forEach(id=>{if(fset[id])document.getElementById(id).value=fset[id];});
   ['fCo','fPay','fZone','fTier','fStatus','fFrom','fTo'].forEach(id=>document.getElementById(id).addEventListener('change',render));
   document.getElementById('dim').addEventListener('change',render);
   document.getElementById('reset').onclick=()=>{['fCo','fPay','fZone','fTier','fStatus','fFrom','fTo'].forEach(id=>document.getElementById(id).value='');brandFilter='';document.querySelectorAll('#brandchips .bchip').forEach(x=>x.classList.toggle('on',x.dataset.b===''));render();};
@@ -201,17 +206,17 @@ function renderDim(rs){
 }
 function renderRaw(rs){
   document.getElementById('rawcount').textContent='· '+rs.length+' rows';
-  const cols=[['d','Date','l'],['brand','Brand','l'],['co','Courier','l'],['pay','Pay','l'],['status','Status','l'],['zone','Zone',''],['tier','Tier',''],['att','Att',''],['tr','p→d',''],['reason','RTO reason','l'],['val','₹ Value','']];
+  const cols=[['_id','Order # / AWB','l'],['d','Date','l'],['brand','Brand','l'],['co','Courier','l'],['pay','Pay','l'],['status','Status','l'],['zone','Zone',''],['tier','Tier',''],['att','Att',''],['tr','p→d',''],['reason','RTO reason','l'],['val','₹ Value','']];
   const head='<thead><tr>'+cols.map(c=>`<th class="${c[2]}">${c[1]}</th>`).join('')+'</tr></thead>';
   const show=rs.slice(0,600);
-  const body=show.map(r=>'<tr>'+cols.map(c=>{let v=r[c[0]];if(c[0]==='val')v=v?'₹'+v.toLocaleString('en-IN'):'';if(c[0]==='tr')v=v==null?'':v+'d';if(v==null)v='';return `<td class="${c[2]}">${v}</td>`;}).join('')+'</tr>').join('');
+  const body=show.map(r=>'<tr>'+cols.map(c=>{let v=r[c[0]];if(c[0]==='_id')v=r.ord||r.awb||'';else if(c[0]==='val')v=v?'₹'+v.toLocaleString('en-IN'):'';else if(c[0]==='tr')v=v==null?'':v+'d';if(v==null)v='';return `<td class="${c[2]}">${v}</td>`;}).join('')+'</tr>').join('');
   document.getElementById('rawtable').innerHTML=head+'<tbody>'+body+'</tbody>'+(rs.length>600?'':'');
   if(rs.length>600)document.getElementById('rawcount').textContent='· showing first 600 of '+rs.length+' rows (export for all)';
 }
 function weekOf(d){const dt=new Date(d+'T00:00:00');const day=(dt.getDay()+6)%7;dt.setDate(dt.getDate()-day);return dt.toISOString().slice(0,10);}
 function dimLabel(d){return{co:'Courier',pay:'Payment',zone:'Zone',tier:'City tier',reason:'RTO reason',status:'Status',brand:'Brand',week:'Week'}[d]||d;}
 function exportCsv(){
-  const rs=filtered();const cols=['d','brand','co','pay','status','zone','tier','att','tr','br','reason','val','ew','vw','bw','frt','fwd','city','pin'];
+  const rs=filtered();const cols=['ord','awb','d','brand','co','pay','status','zone','tier','att','tr','br','reason','val','ew','vw','bw','frt','fwd','city','pin'];
   const lines=[cols.join(',')].concat(rs.map(r=>cols.map(c=>{let v=r[c];if(v==null)v='';v=(''+v).replace(/"/g,'""');return /[",\n]/.test(v)?'"'+v+'"':v;}).join(',')));
   const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download=(META.product||'product')+'_orders.csv';document.body.appendChild(a);a.click();a.remove();

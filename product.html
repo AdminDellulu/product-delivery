@@ -623,6 +623,8 @@ const DRILL={
  speed:{title:'Delivery speed',dims:[['zone','By zone'],['tier','By city tier'],['co','By courier'],['week','By week']]},
  ndr:{title:'NDR & returns recovery',dims:[['att','By attempts'],['reason','By RTO reason'],['co','By courier']]}
 };
+// which status slice each drill card represents — carried into the scratch pad so it opens pre-filtered
+const DRILL_STATUS={rto:'RTO',inflight:'In-flight'};
 let PORD=null,dwChart,dwDrill;
 async function getPord(){if(PORD)return PORD;try{const res=await fetch(SUPA_URL+'/rest/v1/rpc/get_product_orders',{method:'POST',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_product:PRODUCT,p_brand:BRAND})});PORD=await res.json();}catch(e){PORD={meta:{},rows:[]};}return PORD;}
 function dwPct(n,d){return d?Math.round(1000*n/d)/10:null;}
@@ -682,7 +684,8 @@ function renderDrawer(dim){
   if(dwChart)dwChart.destroy();
   if(typeof Chart!=='undefined')dwChart=new Chart(document.getElementById('dwchart'),{data:{labels,datasets},
     options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{font:{size:11,weight:'700',family:"'Space Grotesk'"},color:'#1C1B19',boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{font:{size:10.5,weight:'700',family:"'Space Grotesk'"},color:'#1C1B19',maxRotation:55}},y:{min:0,max:pctAxis?104:undefined,grid:{color:'rgba(28,27,25,.07)'},ticks:{callback:v=>pctAxis?v+'%':v,font:{size:10,weight:'700',family:"'Space Grotesk'"},color:'#1C1B19'}},y1:{position:'right',beginAtZero:true,grid:{display:false},ticks:{font:{size:10,weight:'700',family:"'Space Grotesk'"},color:'#1C1B19'}}}}});
-  document.getElementById('dwopen').href='scratchpad.html?product='+encodeURIComponent(PRODUCT)+(BRAND?'&brand='+encodeURIComponent(BRAND):'')+'&dim='+encodeURIComponent(dim);
+  var _sf=DRILL_STATUS[dwDrill];
+  document.getElementById('dwopen').href='scratchpad.html?product='+encodeURIComponent(PRODUCT)+(BRAND?'&brand='+encodeURIComponent(BRAND):'')+'&dim='+encodeURIComponent(dim)+(_sf?'&status='+encodeURIComponent(_sf):'');
 }
 function closeDrawer(){document.getElementById('dwbk').classList.remove('show');document.getElementById('drawer').classList.remove('show');}
 document.querySelectorAll('.card.drill').forEach(c=>c.addEventListener('click',()=>openDrawer(c.dataset.drill)));

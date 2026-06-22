@@ -157,11 +157,11 @@ table.lg tr:hover td{background:#f3ead0}
     <div class="brandchips" id="brandchips"></div>
   </div>
   </div>
-  <div class="slbl">Portfolio at a glance</div>
+  <div class="slbl" id="lblPortfolio">Portfolio at a glance</div>
   <div class="ovgrid" id="portfolio"></div>
 
-  <div class="slbl">The pattern — COD drives RTO</div>
-  <div class="bubblecard"><h3>COD share vs RTO rate · all product lines</h3><div class="cd" id="bubbleDesc">Bubble size = order volume · colour = health flag · hollow = too new to judge. Click a bubble to open the product.</div><div class="bubblewrap"><canvas id="bubble"></canvas></div></div>
+  <div class="slbl" id="lblPattern">The pattern — COD drives RTO</div>
+  <div class="bubblecard" id="patternCard"><h3>COD share vs RTO rate · all product lines</h3><div class="cd" id="bubbleDesc">Bubble size = order volume · colour = health flag · hollow = too new to judge. Click a bubble to open the product.</div><div class="bubblewrap"><canvas id="bubble"></canvas></div></div>
 
   <div id="countline"></div>
   <div id="loadmsg">Loading live data from Supabase…</div>
@@ -243,7 +243,10 @@ function render(){
   const q=document.getElementById('search').value.trim().toLowerCase();
   const sort=document.getElementById('sort').value;
   const allCards=buildCards();
-  buildPortfolio(allCards); buildBubble(allCards); buildLeague(allCards);
+  const searching=q.length>0;
+  ['lblPortfolio','portfolio','lblPattern','patternCard'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display=searching?'none':'';});
+  if(!searching){buildPortfolio(allCards); buildBubble(allCards);}
+  buildLeague(allCards);
   let cards=allCards.filter(x=>!q || (x.display_name||'').toLowerCase().includes(q) || (x.product||'').toLowerCase().includes(q));
   const cmp={recent:(a,b)=>(b.last_order_ts||b.last_order||'').localeCompare(a.last_order_ts||a.last_order||''),
     az:(a,b)=>(a.display_name||'').localeCompare(b.display_name||''),
